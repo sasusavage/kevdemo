@@ -270,3 +270,26 @@ def get_reports():
         return jsonify({"success": True, **report}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ══════════════════════════════════════════════
+#  AI BRAIN
+# ══════════════════════════════════════════════
+
+@api.route("/ai/brain", methods=["POST"])
+def ai_brain():
+    """
+    AI-powered business intelligence & query engine.
+    Body: { "query": "string" }
+    """
+    from .ai_service import ask_ai_brain
+    
+    payload = request.get_json(silent=True)
+    if not payload or "query" not in payload:
+        return jsonify({"success": False, "error": "Query required."}), 400
+        
+    try:
+        response = ask_ai_brain(payload["query"])
+        return jsonify({"success": True, "data": response}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500

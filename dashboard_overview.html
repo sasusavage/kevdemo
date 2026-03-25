@@ -115,11 +115,28 @@
 <h1 class="font-['Manrope'] font-extrabold text-4xl tracking-tight text-on-surface">System Overview</h1>
 <p class="text-secondary mt-1 font-['Inter']">Welcome back, Curator. Here is your precision performance data.</p>
 </div>
-<div class="flex gap-3">
+<div class="flex flex-col sm:flex-row gap-3">
+<button onclick="askBrain('Give me a quick strategic summary')" class="px-5 py-2.5 bg-indigo-600/10 text-indigo-700 rounded-full font-bold text-sm hover:bg-indigo-600/20 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">psychology</span> Brain Briefing
+</button>
 <button onclick="loadAll()" class="px-5 py-2.5 bg-primary text-white rounded-full font-semibold text-sm shadow-lg shadow-indigo-100 hover:bg-primary-container transition-all active:scale-95">
 Refresh Data
 </button>
 </div>
+</div>
+
+<!-- AI Suggestion Banner -->
+<div id="ai-suggestion-box" class="hidden bg-indigo-50 border border-indigo-200 p-4 rounded-xl flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+  <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white shrink-0">
+    <span class="material-symbols-outlined">auto_awesome</span>
+  </div>
+  <div class="flex-1">
+    <h5 class="font-bold text-indigo-900 text-sm mb-1">AI Thinking...</h5>
+    <p id="ai-suggestion-text" class="text-xs text-indigo-700 leading-relaxed"></p>
+  </div>
+  <button onclick="document.getElementById('ai-suggestion-box').classList.add('hidden')" class="text-indigo-400 hover:text-indigo-600">
+    <span class="material-symbols-outlined text-sm">close</span>
+  </button>
 </div>
 
 <!-- Value Cards -->
@@ -420,5 +437,91 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// AI ASSISTANT LOGIC
+async function askBrain(query) {
+  const box = document.getElementById('ai-suggestion-box');
+  const text = document.getElementById('ai-suggestion-text');
+  box.classList.remove('hidden');
+  text.innerHTML = '<span class="italic animate-pulse">Analyzing system health...</span>';
+  
+  try {
+    const res = await fetch(API + '/api/ai/brain', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query})
+    });
+    const j = await res.json();
+    if (j.success) {
+      text.textContent = j.data;
+    } else {
+      text.textContent = "Error: " + j.error;
+    }
+  } catch (e) {
+    text.textContent = "Unable to connect to AI Brain.";
+  }
+}
+
+function toggleChat() {
+  const win = document.getElementById('ai-chat-window');
+  win.classList.toggle('hidden');
+  if(!win.classList.contains('hidden')) document.getElementById('ai-input').focus();
+}
+
+async function sendChat() {
+  const input = document.getElementById('ai-input');
+  const query = input.value.trim();
+  if(!query) return;
+  
+  const container = document.getElementById('chat-messages');
+  container.innerHTML += `<div class="bg-indigo-600 text-white p-3 rounded-lg rounded-tr-none shadow-sm text-xs self-end ml-auto max-w-[85%] mb-4">${query}</div>`;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  
+  const botId = 'bot-' + Date.now();
+  container.innerHTML += `<div id="${botId}" class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm text-xs text-slate-700 max-w-[85%] border border-slate-100 italic animate-pulse mb-4">Thinking...</div>`;
+  container.scrollTop = container.scrollHeight;
+  
+  try {
+    const res = await fetch(API + '/api/ai/brain', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query})
+    });
+    const j = await res.json();
+    const botEl = document.getElementById(botId);
+    botEl.classList.remove('italic', 'animate-pulse');
+    botEl.textContent = j.success ? j.data : "Error: " + j.error;
+    container.scrollTop = container.scrollHeight;
+  } catch (e) {
+    document.getElementById(botId).textContent = "Unable to connect to brain.";
+  }
+}
 </script>
+
+<!-- AI Assistant Floating UI -->
+<div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 font-['Inter']">
+  <div id="ai-chat-window" class="hidden w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden mb-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div class="bg-primary p-4 text-white flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined">neurology</span>
+        <span class="font-bold">Prism Brain</span>
+      </div>
+      <button onclick="toggleChat()"><span class="material-symbols-outlined text-sm">close</span></button>
+    </div>
+    <div id="chat-messages" class="h-64 sm:h-80 overflow-y-auto p-4 flex flex-col bg-slate-50/50">
+      <div class="bg-white p-3 rounded-lg rounded-tl-none shadow-sm text-xs text-slate-700 max-w-[85%] border border-slate-100 mb-4">
+        Greetings! I am the Prism AI Assistant. How can I help you optimize your inventory today?
+      </div>
+    </div>
+    <div class="p-3 bg-white border-t border-slate-100 flex gap-2">
+      <input id="ai-input" type="text" placeholder="Ask the brain..." class="flex-1 bg-slate-100 border-none rounded-full px-4 py-2 text-xs focus:ring-2 focus:ring-primary/20" onkeypress="if(event.key==='Enter') sendChat()">
+      <button onclick="sendChat()" class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:scale-105 transition-transform">
+        <span class="material-symbols-outlined text-sm">send</span>
+      </button>
+    </div>
+  </div>
+  <button id="ai-trigger" onclick="toggleChat()" class="w-14 h-14 bg-indigo-600 text-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all group">
+    <span class="material-symbols-outlined text-3xl group-hover:rotate-12 transition-transform">bolt</span>
+  </button>
+</div>
 </body></html>
