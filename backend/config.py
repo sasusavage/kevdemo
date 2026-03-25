@@ -11,10 +11,8 @@ load_dotenv()
 class Config:
     """Base configuration."""
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "postgresql://username:password@localhost:5432/prism_portal"
-    )
+    _db_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/prism_portal")
+    SQLALCHEMY_DATABASE_URI = _db_url.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
