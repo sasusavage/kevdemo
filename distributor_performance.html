@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Distributor Performance | Prism Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "outline":"#777587","on-primary-fixed":"#0f0069","on-primary-fixed-variant":"#3323cc",
+          "tertiary-container":"#a44100","tertiary":"#7e3000","on-secondary-fixed-variant":"#3a485b",
+          "surface-container":"#eceef0","on-secondary":"#ffffff","surface-dim":"#d8dadc",
+          "on-error-container":"#93000a","on-background":"#191c1e","secondary-fixed":"#d5e3fc",
+          "on-primary":"#ffffff","primary-container":"#4f46e5","primary-fixed":"#e2dfff",
+          "on-secondary-container":"#57657a","on-secondary-fixed":"#0d1c2e",
+          "error-container":"#ffdad6","surface-container-high":"#e6e8ea",
+          "outline-variant":"#c7c4d8","secondary-container":"#d5e3fc","surface":"#f7f9fb",
+          "surface-tint":"#4d44e3","primary":"#3525cd","surface-variant":"#e0e3e5",
+          "inverse-surface":"#2d3133","secondary-fixed-dim":"#b9c7df","on-error":"#ffffff",
+          "secondary":"#515f74","on-surface":"#191c1e","surface-container-highest":"#e0e3e5",
+          "on-surface-variant":"#464555","tertiary-fixed":"#ffdbcc","background":"#f7f9fb",
+          "surface-bright":"#f7f9fb","tertiary-fixed-dim":"#ffb695",
+          "on-tertiary-fixed":"#351000","on-tertiary-fixed-variant":"#7b2f00",
+          "inverse-primary":"#c3c0ff","error":"#ba1a1a","inverse-on-surface":"#eff1f3",
+          "primary-fixed-dim":"#c3c0ff","on-primary-container":"#dad7ff",
+          "surface-container-low":"#f2f4f6","on-tertiary-container":"#ffd2be",
+          "surface-container-lowest":"#ffffff","on-tertiary":"#ffffff"
+        },
+        fontFamily: {"headline":["Manrope"],"body":["Inter"],"label":["Inter"]},
+        borderRadius: {"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .display-font { font-family: 'Manrope', sans-serif; }
+</style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 w-64 border-r border-slate-200/10 dark:border-slate-800/10 z-50">
+<div class="flex items-center gap-3 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">polyline</span>
+</div>
+<div>
+<h2 class="font-['Manrope'] font-extrabold text-indigo-700 dark:text-indigo-300 leading-none">Prism Portal</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Precision Curator</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-indigo-50/50 transition-all duration-300" href="/dashboard">
+<span class="material-symbols-outlined">grid_view</span><span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-indigo-50/50 transition-all duration-300" href="/inventory">
+<span class="material-symbols-outlined">inventory_2</span><span class="font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl px-4 py-3 font-semibold border-l-4 border-indigo-600 scale-102 transition-all duration-300" href="/distributors">
+<span class="material-symbols-outlined">local_shipping</span><span class="font-medium">Distributors</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1">
+<button class="mb-4 bg-primary text-white rounded-xl py-3 px-4 font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">Create Report</button>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 hover:text-indigo-600" href="#"><span class="material-symbols-outlined">settings</span><span class="font-medium">Settings</span></a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 hover:text-indigo-600" href="#"><span class="material-symbols-outlined">logout</span><span class="font-medium">Logout</span></a>
+</div>
+</aside>
+
+<!-- Main Content -->
+<main class="ml-64 min-h-screen">
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 py-3 w-full border-b border-slate-200/20 shadow-sm">
+<div class="flex items-center gap-6 flex-1">
+<h1 class="font-['Manrope'] font-bold text-xl tracking-tighter text-indigo-700 whitespace-nowrap">Inventory Insights</h1>
+<div class="relative w-full max-w-md ml-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input id="search-dist" class="w-full bg-slate-100/50 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 transition-all" placeholder="Search distributors..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4 ml-8">
+<button class="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block"><p class="text-xs font-bold text-on-surface">Admin</p><p class="text-[10px] text-slate-500">Administrator</p></div>
+<div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">A</div>
+</div>
+</div>
+</header>
+
+<div class="p-10 space-y-10">
+<!-- Header -->
+<section class="flex justify-between items-end">
+<div>
+<h2 class="text-4xl font-extrabold tracking-tight font-headline text-on-surface mb-2">Distributor Performance</h2>
+<p class="text-secondary max-w-xl">Real-time analysis of distribution channels. Monitoring sales velocity, revenue impact, and growth trends.</p>
+</div>
+</section>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Total Distributors</p>
+<h3 id="stat-total-dist" class="text-3xl font-extrabold font-headline">--</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-300"></div>
+<p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Total Volume</p>
+<h3 id="stat-total-vol" class="text-3xl font-extrabold font-headline">--</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Total Revenue</p>
+<h3 id="stat-total-rev" class="text-3xl font-extrabold font-headline">--</h3>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Avg. Growth</p>
+<h3 id="stat-avg-growth" class="text-3xl font-extrabold font-headline">--</h3>
+</div>
+</div>
+
+<!-- Distributor List -->
+<div class="space-y-4">
+<div class="grid grid-cols-12 px-8 py-3 bg-surface-container-high rounded-full">
+<div class="col-span-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Distributor Entity</div>
+<div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Sales Volume</div>
+<div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Revenue</div>
+<div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Growth</div>
+<div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-right pr-4">Tier</div>
+</div>
+<div id="dist-list"><p class="px-8 py-6 text-slate-400 italic">Loading distributors...</p></div>
+</div>
+</div>
+</main>
+
+<script>
+const API = window.location.origin;
+function fmtPrice(v) { return 'GHC ' + Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtShort(v) {
+  if (v >= 1000000) return 'GHC ' + (v/1000000).toFixed(1) + 'M';
+  if (v >= 1000) return 'GHC ' + (v/1000).toFixed(1) + 'K';
+  return fmtPrice(v);
+}
+
+let allDist = [];
+
+async function loadPerformance() {
+  const res = await fetch(API + '/api/performance');
+  const j = await res.json();
+  if (!j.success) return;
+  allDist = j.data;
+
+  const totalVol = allDist.reduce((s,d) => s + d.total_volume, 0);
+  const totalRev = allDist.reduce((s,d) => s + d.total_revenue, 0);
+  const growths = allDist.filter(d => d.growth_percent !== 0).map(d => d.growth_percent);
+  const avgGrowth = growths.length ? (growths.reduce((s,g)=>s+g,0)/growths.length).toFixed(1) : '0.0';
+
+  document.getElementById('stat-total-dist').textContent = allDist.length.toLocaleString();
+  document.getElementById('stat-total-vol').textContent = totalVol.toLocaleString();
+  document.getElementById('stat-total-rev').textContent = fmtShort(totalRev);
+  document.getElementById('stat-avg-growth').textContent = (avgGrowth >= 0 ? '+' : '') + avgGrowth + '%';
+
+  renderList(allDist);
+}
+
+function renderList(data) {
+  const maxVol = Math.max(...data.map(d => d.total_volume), 1);
+  document.getElementById('dist-list').innerHTML = data.map(d => {
+    const pct = Math.max(5, (d.total_volume / maxVol) * 100);
+    const g = d.growth_percent;
+    const gColor = g >= 0 ? 'text-green-600' : 'text-error';
+    const gIcon = g >= 0 ? 'north_east' : 'south_east';
+    const initial = d.name.charAt(0).toUpperCase();
+    return `<div class="grid grid-cols-12 items-center px-8 py-6 bg-surface-container-lowest rounded-xl hover:bg-primary-fixed/30 transition-all duration-300 group cursor-pointer border-l-4 border-transparent hover:border-primary">
+      <div class="col-span-4 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg">${initial}</div>
+        <div>
+          <h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">${d.name}</h4>
+          <p class="text-xs text-secondary">${d.region || 'Ghana'} &bull; ${d.tier || 'Distributor'}</p>
+        </div>
+      </div>
+      <div class="col-span-2 text-center">
+        <span class="text-sm font-semibold">${d.total_volume.toLocaleString()} Units</span>
+        <div class="w-full bg-slate-100 h-1 rounded-full mt-2 max-w-[80px] mx-auto overflow-hidden">
+          <div class="bg-primary h-full rounded-full" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <div class="col-span-2 text-center">
+        <span class="text-sm font-bold font-headline">${fmtShort(d.total_revenue)}</span>
+      </div>
+      <div class="col-span-2 flex justify-center items-center gap-1">
+        <span class="text-sm font-bold ${gColor}">${g >= 0 ? '+' : ''}${g}%</span>
+        <span class="material-symbols-outlined ${gColor} text-lg">${gIcon}</span>
+      </div>
+      <div class="col-span-2 flex justify-end pr-4">
+        <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">${d.tier || 'Distributor'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Search
+document.getElementById('search-dist').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  renderList(allDist.filter(d => d.name.toLowerCase().includes(q)));
+});
+
+loadPerformance();
+</script>
+</body></html>

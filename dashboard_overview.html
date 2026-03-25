@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard | Prism Portal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "outline":"#777587","on-primary-fixed":"#0f0069","on-primary-fixed-variant":"#3323cc",
+          "tertiary-container":"#a44100","tertiary":"#7e3000","on-secondary-fixed-variant":"#3a485b",
+          "surface-container":"#eceef0","on-secondary":"#ffffff","surface-dim":"#d8dadc",
+          "on-error-container":"#93000a","on-background":"#191c1e","secondary-fixed":"#d5e3fc",
+          "on-primary":"#ffffff","primary-container":"#4f46e5","primary-fixed":"#e2dfff",
+          "on-secondary-container":"#57657a","on-secondary-fixed":"#0d1c2e",
+          "error-container":"#ffdad6","surface-container-high":"#e6e8ea",
+          "outline-variant":"#c7c4d8","secondary-container":"#d5e3fc","surface":"#f7f9fb",
+          "surface-tint":"#4d44e3","primary":"#3525cd","surface-variant":"#e0e3e5",
+          "inverse-surface":"#2d3133","secondary-fixed-dim":"#b9c7df","on-error":"#ffffff",
+          "secondary":"#515f74","on-surface":"#191c1e","surface-container-highest":"#e0e3e5",
+          "on-surface-variant":"#464555","tertiary-fixed":"#ffdbcc","background":"#f7f9fb",
+          "surface-bright":"#f7f9fb","tertiary-fixed-dim":"#ffb695",
+          "on-tertiary-fixed":"#351000","on-tertiary-fixed-variant":"#7b2f00",
+          "inverse-primary":"#c3c0ff","error":"#ba1a1a","inverse-on-surface":"#eff1f3",
+          "primary-fixed-dim":"#c3c0ff","on-primary-container":"#dad7ff",
+          "surface-container-low":"#f2f4f6","on-tertiary-container":"#ffd2be",
+          "surface-container-lowest":"#ffffff","on-tertiary":"#ffffff"
+        },
+        fontFamily: {"headline":["Manrope"],"body":["Inter"],"label":["Inter"]},
+        borderRadius: {"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+  .glass-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); }
+</style>
+</head>
+<body class="text-on-surface">
+
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 border-r border-slate-200/10 dark:border-slate-800/10 w-64 z-50">
+<div class="flex items-center gap-3 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white overflow-hidden">
+<span class="material-symbols-outlined">polyline</span>
+</div>
+<div>
+<h2 class="font-['Manrope'] font-extrabold text-indigo-700 dark:text-indigo-300 leading-none">Prism Portal</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1">Precision Curator</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1 mt-4">
+<a class="flex items-center gap-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl px-4 py-3 font-semibold border-l-4 border-indigo-600 scale-102 hover:translate-x-1 transition-all duration-300" href="/dashboard">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-['Inter'] medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-indigo-50/50 dark:hover:bg-slate-800/50 transition-all duration-300" href="/inventory">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-['Inter'] medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-indigo-50/50 dark:hover:bg-slate-800/50 transition-all duration-300" href="/distributors">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-['Inter'] medium">Distributors</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1">
+<div class="mt-4 px-2">
+<button class="w-full py-3 px-4 bg-primary-container text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-sm">add</span> Create Report
+</button>
+</div>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span><span class="font-['Inter'] medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">logout</span><span class="font-['Inter'] medium">Logout</span>
+</a>
+</div>
+</aside>
+
+<!-- Main Content -->
+<main class="ml-64 min-h-screen bg-surface">
+<header class="sticky top-0 z-40 flex justify-between items-center px-8 py-3 w-full border-b border-slate-200/20 bg-white/80 backdrop-blur-xl shadow-sm">
+<div class="flex items-center gap-8">
+<span class="font-['Manrope'] font-bold text-xl tracking-tighter text-indigo-700">Inventory Insights</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right"><p class="text-xs font-bold">Admin User</p><p class="text-[10px] text-slate-400 uppercase tracking-tighter">System Overseer</p></div>
+<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">A</div>
+</div>
+</div>
+</header>
+
+<div class="p-10 space-y-10">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="font-['Manrope'] font-extrabold text-4xl tracking-tight text-on-surface">System Overview</h1>
+<p class="text-secondary mt-1 font-['Inter']">Welcome back, Curator. Here is your precision performance data.</p>
+</div>
+<div class="flex gap-3">
+<button onclick="loadAll()" class="px-5 py-2.5 bg-primary text-white rounded-full font-semibold text-sm shadow-lg shadow-indigo-100 hover:bg-primary-container transition-all active:scale-95">
+Refresh Data
+</button>
+</div>
+</div>
+
+<!-- Value Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div><p class="text-sm font-medium text-secondary uppercase tracking-wider">Total Stock</p>
+<h3 id="stat-total-stock" class="font-['Manrope'] font-bold text-3xl mt-2 tracking-tight">--</h3></div>
+<div id="stat-total-stock-trend" class="mt-6 flex items-center gap-2 text-emerald-600 font-bold text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span><span>Loading...</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary-container"></div>
+<div><p class="text-sm font-medium text-secondary uppercase tracking-wider">Weekly Sales</p>
+<h3 id="stat-weekly" class="font-['Manrope'] font-bold text-3xl mt-2 tracking-tight">--</h3></div>
+<div id="stat-weekly-trend" class="mt-6 flex items-center gap-2 text-emerald-600 font-bold text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span><span>Loading...</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<div><p class="text-sm font-medium text-secondary uppercase tracking-wider">Monthly Sales</p>
+<h3 id="stat-monthly" class="font-['Manrope'] font-bold text-3xl mt-2 tracking-tight">--</h3></div>
+<div id="stat-monthly-trend" class="mt-6 flex items-center gap-2 font-bold text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span><span>Loading...</span>
+</div>
+</div>
+<div class="bg-primary-container p-6 rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<div><p class="text-sm font-medium text-primary-fixed uppercase tracking-wider">Total Revenue</p>
+<h3 id="stat-revenue" class="font-['Manrope'] font-bold text-3xl mt-2 tracking-tight text-white">--</h3></div>
+<div class="mt-6 flex items-center gap-2 text-primary-fixed font-bold text-sm">
+<span class="material-symbols-outlined text-sm">payments</span>
+<span id="stat-revenue-sub">Loading...</span>
+</div>
+</div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Revenue Timeline -->
+<div class="xl:col-span-2 bg-surface-container-lowest p-8 rounded-xl">
+<div class="flex justify-between items-center mb-10">
+<div><h4 class="font-['Manrope'] font-bold text-xl">Revenue Trends</h4>
+<p class="text-sm text-secondary">Monthly revenue over the past 12 months.</p></div>
+</div>
+<div id="chart-container" class="h-64 flex items-end justify-between gap-2 px-2">
+<p class="text-slate-400 italic">Loading chart...</p>
+</div>
+<div id="chart-labels" class="flex justify-between mt-6 px-2 text-[10px] uppercase font-bold text-slate-400 tracking-tighter"></div>
+</div>
+
+<!-- Distributor Volume -->
+<div class="xl:col-span-1 bg-surface-container-lowest p-8 rounded-xl">
+<div class="mb-10">
+<h4 class="font-['Manrope'] font-bold text-xl">Distributor Sales</h4>
+<p class="text-sm text-secondary">Volume comparison by top distributors.</p>
+</div>
+<div id="dist-bars" class="space-y-6"><p class="text-slate-400 italic">Loading...</p></div>
+<div class="mt-12 pt-8 border-t border-slate-100">
+<a href="/distributors" class="w-full text-center text-primary font-bold text-sm hover:underline block">View Detailed Distributor Performance</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<script>
+const API = window.location.origin;
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtPrice(v) { return 'GHC ' + Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtShort(v) {
+  if (v >= 1000000) return 'GHC ' + (v/1000000).toFixed(1) + 'M';
+  if (v >= 1000) return 'GHC ' + (v/1000).toFixed(1) + 'K';
+  return fmtPrice(v);
+}
+
+async function loadStats() {
+  const res = await fetch(API + '/api/stats');
+  const j = await res.json();
+  if (!j.success) return;
+  const d = j.data;
+
+  document.getElementById('stat-total-stock').textContent = d.total_sales_volume.toLocaleString();
+  document.getElementById('stat-weekly').textContent = d.weekly_sales.toLocaleString();
+  document.getElementById('stat-monthly').textContent = d.monthly_sales.toLocaleString();
+  document.getElementById('stat-revenue').textContent = fmtShort(d.total_revenue);
+  document.getElementById('stat-revenue-sub').textContent = 'All-time revenue';
+
+  // Weekly trend
+  const wt = d.weekly_growth;
+  const wtEl = document.getElementById('stat-weekly-trend');
+  wtEl.innerHTML = `<span class="material-symbols-outlined text-sm">${wt >= 0 ? 'trending_up' : 'trending_down'}</span>
+    <span>${wt >= 0 ? '+' : ''}${wt}% <span class="text-slate-400 font-normal ml-1">vs last week</span></span>`;
+  wtEl.className = 'mt-6 flex items-center gap-2 font-bold text-sm ' + (wt >= 0 ? 'text-emerald-600' : 'text-error');
+
+  // Monthly trend
+  const mt = d.monthly_growth;
+  const mtEl = document.getElementById('stat-monthly-trend');
+  mtEl.innerHTML = `<span class="material-symbols-outlined text-sm">${mt >= 0 ? 'trending_up' : 'trending_down'}</span>
+    <span>${mt >= 0 ? '+' : ''}${mt}% <span class="text-slate-400 font-normal ml-1">vs last month</span></span>`;
+  mtEl.className = 'mt-6 flex items-center gap-2 font-bold text-sm ' + (mt >= 0 ? 'text-emerald-600' : 'text-error');
+
+  // Total stock trend
+  const stEl = document.getElementById('stat-total-stock-trend');
+  stEl.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span><span>Units sold total</span>`;
+
+  // Revenue chart
+  const timeline = d.monthly_timeline;
+  if (timeline.length) {
+    const maxRev = Math.max(...timeline.map(t => t.revenue));
+    const container = document.getElementById('chart-container');
+    container.innerHTML = timeline.map(t => {
+      const h = Math.max(5, (t.revenue / maxRev) * 100);
+      return `<div class="flex-1 flex flex-col items-center gap-1">
+        <span class="text-[9px] font-bold text-slate-500">${fmtShort(t.revenue)}</span>
+        <div class="w-full bg-primary rounded-t-lg transition-all duration-500" style="height:${h}%"></div>
+      </div>`;
+    }).join('');
+    document.getElementById('chart-labels').innerHTML = timeline.map(t => `<span>${months[t.month-1]}</span>`).join('');
+  }
+}
+
+async function loadDistributors() {
+  const res = await fetch(API + '/api/performance');
+  const j = await res.json();
+  if (!j.success) return;
+  const top5 = j.data.slice(0, 5);
+  const maxVol = Math.max(...top5.map(d => d.total_volume));
+  const barColors = ['bg-primary','bg-secondary-container','bg-tertiary','bg-primary-fixed-dim','bg-outline-variant'];
+
+  document.getElementById('dist-bars').innerHTML = top5.map((d, i) => {
+    const pct = Math.max(5, (d.total_volume / maxVol) * 100);
+    return `<div>
+      <div class="flex justify-between items-end mb-2">
+        <span class="text-sm font-bold">${d.name}</span>
+        <span class="text-xs text-slate-400">${d.total_volume.toLocaleString()} units</span>
+      </div>
+      <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-full ${barColors[i]} rounded-full" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadAll() { loadStats(); loadDistributors(); }
+loadAll();
+</script>
+</body></html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inventory Management | Prism Portal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "outline":"#777587","on-primary-fixed":"#0f0069","on-primary-fixed-variant":"#3323cc",
+          "tertiary-container":"#a44100","tertiary":"#7e3000","on-secondary-fixed-variant":"#3a485b",
+          "surface-container":"#eceef0","on-secondary":"#ffffff","surface-dim":"#d8dadc",
+          "on-error-container":"#93000a","on-background":"#191c1e","secondary-fixed":"#d5e3fc",
+          "on-primary":"#ffffff","primary-container":"#4f46e5","primary-fixed":"#e2dfff",
+          "on-secondary-container":"#57657a","on-secondary-fixed":"#0d1c2e",
+          "error-container":"#ffdad6","surface-container-high":"#e6e8ea",
+          "outline-variant":"#c7c4d8","secondary-container":"#d5e3fc","surface":"#f7f9fb",
+          "surface-tint":"#4d44e3","primary":"#3525cd","surface-variant":"#e0e3e5",
+          "inverse-surface":"#2d3133","secondary-fixed-dim":"#b9c7df","on-error":"#ffffff",
+          "secondary":"#515f74","on-surface":"#191c1e","surface-container-highest":"#e0e3e5",
+          "on-surface-variant":"#464555","tertiary-fixed":"#ffdbcc","background":"#f7f9fb",
+          "surface-bright":"#f7f9fb","tertiary-fixed-dim":"#ffb695",
+          "on-tertiary-fixed":"#351000","on-tertiary-fixed-variant":"#7b2f00",
+          "inverse-primary":"#c3c0ff","error":"#ba1a1a","inverse-on-surface":"#eff1f3",
+          "primary-fixed-dim":"#c3c0ff","on-primary-container":"#dad7ff",
+          "surface-container-low":"#f2f4f6","on-tertiary-container":"#ffd2be",
+          "surface-container-lowest":"#ffffff","on-tertiary":"#ffffff"
+        },
+        fontFamily: {"headline":["Manrope"],"body":["Inter"],"label":["Inter"]},
+        borderRadius: {"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+</style>
+</head>
+<body class="bg-surface text-on-surface">
+
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 w-64 border-r border-slate-200/10 dark:border-slate-800/10 z-50">
+<div class="flex items-center gap-3 px-2">
+<div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">polyline</span>
+</div>
+<div>
+<div class="font-['Manrope'] font-extrabold text-indigo-700 dark:text-indigo-300 text-lg leading-tight">Prism Portal</div>
+<div class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Precision Curator</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1 mt-4">
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 transition-all duration-300" href="/dashboard">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-medium font-['Inter']">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl px-4 py-3 font-semibold border-l-4 border-indigo-600 scale-102 hover:translate-x-1 transition-all duration-300" href="/inventory">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-medium font-['Inter']">Inventory</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:text-indigo-600 dark:hover:text-indigo-300 transition-all duration-300" href="/distributors">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-medium font-['Inter']">Distributors</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1">
+<button class="bg-primary text-on-primary rounded-full py-3 px-6 font-bold text-sm mb-6 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+Create Report
+</button>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-indigo-600 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span><span class="text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-2 hover:text-indigo-600 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">logout</span><span class="text-sm">Logout</span>
+</a>
+</div>
+</aside>
+
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl z-40 flex justify-between items-center px-8 border-b border-slate-200/20 dark:border-slate-800/20 shadow-sm">
+<div class="flex items-center gap-4 flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input id="search-input" class="w-full bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 placeholder:text-slate-400" placeholder="Search inventory by SKU or name..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300 hidden sm:block">Admin</span>
+<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">A</div>
+</div>
+</div>
+</header>
+
+<!-- Main Canvas -->
+<main class="ml-64 pt-24 px-12 pb-12 min-h-screen">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">Inventory Management</h1>
+<p class="text-on-surface-variant text-sm">Real-time oversight of precision curated hardware and consumables.</p>
+</div>
+<button id="btn-record-sale" class="bg-gradient-to-r from-primary to-primary-container text-on-primary px-8 py-4 rounded-xl font-bold flex items-center gap-3 shadow-xl shadow-primary/20 hover:translate-y-[-2px] active:translate-y-0 transition-all duration-200">
+<span class="material-symbols-outlined">point_of_sale</span>
+Record Sale
+</button>
+</div>
+
+<!-- Metrics -->
+<div class="grid grid-cols-4 gap-6 mb-12">
+<div class="col-span-1 bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total SKU Count</p>
+<h2 id="total-sku" class="text-3xl font-headline font-bold text-indigo-900">--</h2>
+<div class="mt-4 flex items-center gap-1 text-emerald-600 text-xs font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span> Active products
+</div>
+</div>
+<div class="col-span-1 bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-tertiary">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Low Stock Alerts</p>
+<h2 id="low-stock" class="text-3xl font-headline font-bold text-on-surface">--</h2>
+<div class="mt-4 flex items-center gap-1 text-error text-xs font-bold">
+<span class="material-symbols-outlined text-sm">warning</span> Requires action
+</div>
+</div>
+<div class="col-span-2 bg-indigo-900 p-6 rounded-xl shadow-lg relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2">Inventory Value</p>
+<h2 id="inventory-value" class="text-4xl font-headline font-extrabold text-white">--</h2>
+<p class="text-indigo-400 text-xs mt-4">Estimated valuation based on current unit pricing.</p>
+</div>
+<div class="absolute right-[-20px] bottom-[-20px] opacity-10">
+<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+</div>
+</div>
+
+<!-- Table -->
+<div class="bg-surface-container-low rounded-2xl p-1 pb-1">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<table class="w-full text-left border-separate border-spacing-0">
+<thead>
+<tr class="bg-surface-container-high">
+<th class="px-8 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-outline-variant/10">Product Name</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-outline-variant/10">SKU</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-outline-variant/10">Category</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-outline-variant/10 text-right">Qty in Stock</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-outline-variant/10 text-right">Unit Price</th>
+<th class="px-8 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-outline-variant/10 text-center">Status</th>
+</tr>
+</thead>
+<tbody id="inventory-tbody" class="divide-y divide-slate-100/50">
+<tr><td colspan="6" class="px-8 py-10 text-center text-slate-400 italic">Loading inventory...</td></tr>
+</tbody>
+</table>
+<div class="px-8 py-4 bg-slate-50 flex items-center justify-between">
+<span id="table-count" class="text-xs text-slate-500 font-medium italic">Loading...</span>
+</div>
+</div>
+</div>
+</main>
+
+<!-- Sale Modal -->
+<div id="sale-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-on-background/40 backdrop-blur-sm px-6 hidden">
+<div class="w-full max-w-xl bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0px_20px_40px_rgba(25,28,30,0.06)] overflow-hidden border border-white/20" style="border-radius: 2rem;">
+<div class="p-10">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-12 h-12 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">shopping_cart_checkout</span>
+</div>
+<div>
+<h2 class="text-2xl font-headline font-extrabold text-on-surface">Record Sale</h2>
+<p class="text-on-surface-variant text-sm">Input item details to update inventory records.</p>
+</div>
+</div>
+<form id="sale-form" class="space-y-6">
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Select Product</label>
+<select id="sale-product" class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant/30 focus:border-primary focus:ring-0 py-3 px-1 text-on-surface">
+<option value="">Loading...</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Select Distributor</label>
+<select id="sale-distributor" class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant/30 focus:border-primary focus:ring-0 py-3 px-1 text-on-surface">
+<option value="">Loading...</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Quantity Sold</label>
+<input id="sale-qty" class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant/30 focus:border-primary focus:ring-0 py-3 px-1 text-on-surface" min="1" type="number" value="1"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Sale Date</label>
+<input id="sale-date" class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant/30 focus:border-primary focus:ring-0 py-3 px-1 text-on-surface" type="date"/>
+</div>
+</div>
+<div id="sale-error" class="text-error text-sm font-semibold hidden"></div>
+<div id="sale-success" class="text-emerald-600 text-sm font-semibold hidden"></div>
+<div class="pt-6 flex gap-4">
+<button id="btn-cancel" class="flex-1 py-4 px-6 border border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-slate-100 transition-colors" type="button">Cancel</button>
+<button class="flex-1 py-4 px-6 bg-primary text-on-primary rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-100 transition-all" type="submit">Submit Sale</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+const API = window.location.origin;
+
+function fmtPrice(v) { return 'GHC ' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function statusHTML(s) {
+  if (s === 'In Stock') return '<span class="inline-flex h-2 w-2 rounded-full bg-emerald-500 mr-2"></span><span class="text-xs font-semibold text-emerald-700">In Stock</span>';
+  if (s === 'Low Stock') return '<span class="inline-flex h-2 w-2 rounded-full bg-amber-500 mr-2"></span><span class="text-xs font-semibold text-amber-700">Low Stock</span>';
+  return '<span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span><span class="text-xs font-semibold text-red-600">Out of Stock</span>';
+}
+
+const colors = ['bg-indigo-100 text-indigo-700','bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700','bg-rose-100 text-rose-700','bg-sky-100 text-sky-700'];
+
+let allProducts = [];
+
+async function loadInventory() {
+  const res = await fetch(API + '/api/inventory');
+  const j = await res.json();
+  if (!j.success) return;
+  allProducts = j.data;
+  const s = j.summary;
+
+  document.getElementById('total-sku').textContent = s.total_sku.toLocaleString();
+  document.getElementById('low-stock').textContent = s.low_stock_alerts.toLocaleString();
+  document.getElementById('inventory-value').textContent = fmtPrice(s.inventory_value);
+
+  renderTable(allProducts);
+
+  // populate sale dropdown
+  document.getElementById('sale-product').innerHTML = allProducts.map(p =>
+    '<option value="'+p.id+'">'+p.name+' ('+p.sku+')</option>'
+  ).join('');
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('inventory-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="px-8 py-10 text-center text-slate-400 italic">No products found.</td></tr>'; return; }
+  tbody.innerHTML = data.map((p, i) => {
+    const c = colors[i % colors.length];
+    return `<tr class="group hover:bg-primary-fixed/30 transition-colors duration-200">
+      <td class="px-8 py-5"><div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg ${c} flex items-center justify-center font-bold text-sm">${p.name[0]}</div>
+        <span class="font-semibold text-on-surface">${p.name}</span>
+      </div></td>
+      <td class="px-6 py-5 font-mono text-xs text-slate-500">${p.sku}</td>
+      <td class="px-6 py-5"><span class="bg-secondary-container text-on-secondary-container text-[10px] px-2.5 py-1 rounded-full font-bold uppercase">${p.category||'General'}</span></td>
+      <td class="px-6 py-5 text-right font-medium text-on-surface">${p.quantity.toLocaleString()}</td>
+      <td class="px-6 py-5 text-right font-bold text-on-surface">${fmtPrice(p.price)}</td>
+      <td class="px-8 py-5 text-center">${statusHTML(p.status)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('table-count').textContent = 'Showing ' + data.length + ' products';
+}
+
+async function loadDistributors() {
+  const res = await fetch(API + '/api/performance');
+  const j = await res.json();
+  if (!j.success) return;
+  document.getElementById('sale-distributor').innerHTML = j.data.map(d =>
+    '<option value="'+d.id+'">'+d.name+'</option>'
+  ).join('');
+}
+
+// Search
+document.getElementById('search-input').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  renderTable(allProducts.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)));
+});
+
+// Modal
+const modal = document.getElementById('sale-modal');
+document.getElementById('btn-record-sale').addEventListener('click', () => {
+  modal.classList.remove('hidden');
+  document.getElementById('sale-error').classList.add('hidden');
+  document.getElementById('sale-success').classList.add('hidden');
+});
+document.getElementById('btn-cancel').addEventListener('click', () => modal.classList.add('hidden'));
+modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+
+// Submit sale
+document.getElementById('sale-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('sale-error');
+  const okEl = document.getElementById('sale-success');
+  errEl.classList.add('hidden'); okEl.classList.add('hidden');
+
+  const body = {
+    product_id: +document.getElementById('sale-product').value,
+    distributor_id: +document.getElementById('sale-distributor').value,
+    quantity_sold: +document.getElementById('sale-qty').value,
+  };
+  const d = document.getElementById('sale-date').value;
+  if (d) body.sale_date = d;
+
+  try {
+    const r = await fetch(API + '/api/sales', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error);
+    okEl.textContent = 'Sale recorded! Total: ' + fmtPrice(j.data.total_price);
+    okEl.classList.remove('hidden');
+    setTimeout(() => { modal.classList.add('hidden'); loadInventory(); }, 1500);
+  } catch(err) {
+    errEl.textContent = err.message; errEl.classList.remove('hidden');
+  }
+});
+
+loadInventory();
+loadDistributors();
+</script>
+</body></html>
