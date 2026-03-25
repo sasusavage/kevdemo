@@ -245,9 +245,16 @@ async function loadStats() {
     
     // Responsive month labels
     const isMobile = window.innerWidth < 640;
-    document.getElementById('chart-labels').innerHTML = timeline.map(t => {
-      const name = months[t.month-1];
-      return `<span>${isMobile ? name[0] : name}</span>`;
+    document.getElementById('chart-labels').innerHTML = timeline.map((t, idx) => {
+      const monthName = months[t.month-1];
+      const yearShort = t.year.toString().slice(-2);
+      
+      // Show year if it's Jan or the very first label
+      const shouldShowYear = t.month === 1 || idx === 0;
+      let label = isMobile ? monthName[0] : monthName;
+      if (shouldShowYear && !isMobile) label += " '" + yearShort;
+      
+      return `<span>${label}</span>`;
     }).join('');
   }
 }

@@ -554,37 +554,36 @@ def get_sales_stats():
         .scalar()
     )
 
-    # Monthly revenue timeline (Jan to Dec of the current year)
-    current_year = now.year
-    
-    monthly_data = (
-        db.session.query(
-            extract("month", Sale.timestamp).label("month"),
-            func.sum(Sale.total_price).label("revenue"),
-            func.sum(Sale.quantity_sold).label("volume"),
-        )
-        .filter(extract("year", Sale.timestamp) == current_year)
-        .group_by("month")
-        .order_by("month")
-        .all()
-    )
-    
-    data_map = {int(r.month): r for r in monthly_data}
+    # Monthly revenue timeline (Trailing 12 Months)
     timeline = []
     
-    # Always return 12 months (Jan to Dec)
-    for month_idx in range(1, 13):
-        row = data_map.get(month_idx)
-        rev = float(row.revenue) if row else 0.0
-        vol = int(row.volume) if row else 0
+    # Generate 12 months of slots ending with current month
+    for i in range(11, -1, -1):
+        target_date = now - timedelta(days=i * 30) # approx 30-day steps back
+        target_month = target_date.month
+        target_year = target_date.year
         
-        # Calculate growth relative to previous month in the timeline
-        prev_rev = timeline[-1]["revenue"] if month_idx > 1 else 0.0
+        # Get data for this specific year/month
+        row = (
+            db.session.query(
+                func.sum(Sale.total_price).label("revenue"),
+                func.sum(Sale.quantity_sold).label("volume"),
+            )
+            .filter(extract("year", Sale.timestamp) == target_year)
+            .filter(extract("month", Sale.timestamp) == target_month)
+            .first()
+        )
+        
+        rev = float(row.revenue) if row and row.revenue else 0.0
+        vol = int(row.volume) if row and row.volume else 0
+        
+        # Calculate growth relative to the previous entry in our generated timeline
+        prev_rev = timeline[-1]["revenue"] if len(timeline) > 0 else 0.0
         growth = calculate_growth_trend(rev, prev_rev)
         
         timeline.append({
-            "year": current_year,
-            "month": month_idx,
+            "year": target_year,
+            "month": target_month,
             "revenue": rev,
             "volume": vol,
             "growth_percent": growth,
