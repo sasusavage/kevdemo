@@ -1,15 +1,15 @@
 import os
 from groq import Groq
 from flask import current_app
-from .services import get_sales_stats, get_forecast, get_distributor_performance
+import services
 
 def get_ai_context():
     """
     Produce a high-density summary of the current inventory state for the AI Brain.
     """
-    stats = get_sales_stats()
-    forecasts = get_forecast()
-    distributors = get_distributor_performance()
+    stats = services.get_sales_stats()
+    forecasts = services.get_forecast()
+    distributors = services.get_distributor_performance()
     
     # Filter for urgent items
     critical_items = [f for f in forecasts if f['alert_level'] == 'critical']
