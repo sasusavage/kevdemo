@@ -159,31 +159,67 @@ Refresh Data
 </div>
 </div>
 
-<!-- Charts Row -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Charts & Intelligence Row -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
 <!-- Revenue Timeline -->
-<div class="xl:col-span-2 bg-surface-container-lowest p-4 sm:p-8 rounded-xl">
-<div class="flex justify-between items-center mb-10">
-<div><h4 class="font-['Manrope'] font-bold text-xl">Revenue Trends</h4>
-<p class="text-sm text-secondary">Timeline overview for the current year.</p></div>
-</div>
-<div id="chart-container" class="h-64 flex items-end justify-between gap-1 sm:gap-2 px-1 sm:px-2 w-full">
-<p class="text-slate-400 italic">Formatting analytics...</p>
-</div>
-<div id="chart-labels" class="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter w-full"></div>
+<div class="xl:col-span-2 bg-surface-container-lowest p-4 sm:p-8 rounded-xl shadow-sm">
+  <div class="flex justify-between items-center mb-10">
+    <div><h4 class="font-['Manrope'] font-bold text-xl">Revenue Trends</h4>
+    <p class="text-sm text-secondary">Timeline overview for the trailing 12 months.</p></div>
+  </div>
+  <div id="chart-container" class="h-64 flex items-end justify-between gap-1 sm:gap-2 px-1 sm:px-2 w-full">
+    <p class="text-slate-400 italic">Formatting analytics...</p>
+  </div>
+  <div id="chart-labels" class="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter w-full"></div>
 </div>
 
 <!-- Distributor Volume -->
-<div class="xl:col-span-1 bg-surface-container-lowest p-8 rounded-xl">
-<div class="mb-10">
-<h4 class="font-['Manrope'] font-bold text-xl">Distributor Sales</h4>
-<p class="text-sm text-secondary">Volume comparison by top distributors.</p>
+<div class="xl:col-span-1 bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+  <div class="mb-10">
+    <h4 class="font-['Manrope'] font-bold text-xl">Top Distributors</h4>
+    <p class="text-sm text-secondary">Volume comparison by leading partners.</p>
+  </div>
+  <div id="dist-bars" class="space-y-6"><p class="text-slate-400 italic">Loading...</p></div>
+  <div class="mt-12 pt-8 border-t border-slate-100">
+    <a href="/distributors" class="w-full text-center text-primary font-bold text-sm hover:underline block">View Performance Details</a>
+  </div>
 </div>
-<div id="dist-bars" class="space-y-6"><p class="text-slate-400 italic">Loading...</p></div>
-<div class="mt-12 pt-8 border-t border-slate-100">
-<a href="/distributors" class="w-full text-center text-primary font-bold text-sm hover:underline block">View Detailed Distributor Performance</a>
 </div>
-</div>
+
+<!-- New Intelligence Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+  <!-- Stock Alerts -->
+  <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border-t-4 border-error">
+    <div class="flex justify-between items-center mb-6">
+      <h4 class="font-['Manrope'] font-bold text-lg">Critical Alerts</h4>
+      <span id="alert-badge" class="bg-error/10 text-error text-[10px] px-2 py-0.5 rounded-full font-bold">-- Items</span>
+    </div>
+    <div id="alert-list" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+      <p class="text-slate-400 text-sm italic text-center py-10">Scanning inventory...</p>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+    <div class="flex justify-between items-center mb-6">
+      <h4 class="font-['Manrope'] font-bold text-lg text-primary">Recent Activity</h4>
+      <span class="material-symbols-outlined text-slate-300">history</span>
+    </div>
+    <div id="activity-feed" class="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+      <p class="text-slate-400 text-sm italic text-center py-10">Fetching logs...</p>
+    </div>
+  </div>
+
+  <!-- Out-of-Stock Risk Projections -->
+  <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border-t-4 border-tertiary">
+    <div class="flex justify-between items-center mb-6">
+      <h4 class="font-['Manrope'] font-bold text-lg">OOS Projections</h4>
+      <span class="material-symbols-outlined text-tertiary">hourglass_bottom</span>
+    </div>
+    <div id="burn-list" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+      <p class="text-slate-400 text-sm italic text-center py-10">Calculating velocity...</p>
+    </div>
+  </div>
 </div>
 </div>
 </main>
@@ -263,25 +299,112 @@ async function loadDistributors() {
   const res = await fetch(API + '/api/performance');
   const j = await res.json();
   if (!j.success) return;
-  const top5 = j.data.slice(0, 5);
-  const maxVol = Math.max(...top5.map(d => d.total_volume));
+  const top5 = j.data.slice(0, 5).filter(d => d.total_volume > 0);
+  const maxVol = Math.max(...top5.map(d => d.total_volume), 1);
   const barColors = ['bg-primary','bg-secondary-container','bg-tertiary','bg-primary-fixed-dim','bg-outline-variant'];
+
+  if (!top5.length) { document.getElementById('dist-bars').innerHTML = '<p class="text-slate-400 italic text-center py-4">No sales recorded yet.</p>'; return; }
 
   document.getElementById('dist-bars').innerHTML = top5.map((d, i) => {
     const pct = Math.max(5, (d.total_volume / maxVol) * 100);
     return `<div>
-      <div class="flex justify-between items-end mb-2">
-        <span class="text-sm font-bold">${d.name}</span>
-        <span class="text-xs text-slate-400">${d.total_volume.toLocaleString()} units</span>
+      <div class="flex justify-between items-end mb-2 text-xs">
+        <span class="font-bold">${d.name}</span>
+        <span class="text-slate-400">${d.total_volume.toLocaleString()} units</span>
       </div>
-      <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-        <div class="h-full ${barColors[i]} rounded-full" style="width:${pct}%"></div>
+      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-full ${barColors[i % 5]} rounded-full transition-all duration-1000" style="width:${pct}%"></div>
       </div>
     </div>`;
   }).join('');
 }
 
-function loadAll() { loadStats(); loadDistributors(); }
+async function loadAlerts() {
+  const res = await fetch(API + '/api/alerts');
+  const j = await res.json();
+  if (!j.success) return;
+  const list = j.data;
+  document.getElementById('alert-badge').textContent = list.length + ' Items';
+  const container = document.getElementById('alert-list');
+  if (!list.length) { container.innerHTML = '<div class="flex flex-col items-center py-10 opacity-30"><span class="material-symbols-outlined text-4xl mb-2">check_circle</span><p class="text-sm">Stock is healthly</p></div>'; return; }
+  
+  container.innerHTML = list.map(p => `
+    <div class="flex items-center justify-between p-3 bg-surface rounded-xl hover:bg-slate-100 transition-colors">
+      <div class="flex items-center gap-3">
+        <div class="w-1.5 h-8 ${p.alert_level === 'critical' ? 'bg-error' : 'bg-amber-400'} rounded-full"></div>
+        <div>
+          <p class="text-xs font-bold text-on-surface line-clamp-1">${p.name}</p>
+          <p class="text-[10px] text-slate-500">${p.quantity} left &bull; Limit: ${p.min_stock_level}</p>
+        </div>
+      </div>
+      <a href="/inventory" class="text-xs font-bold text-primary hover:underline">Restock</a>
+    </div>
+  `).join('');
+}
+
+async function loadActivity() {
+  const res = await fetch(API + '/api/transactions');
+  const j = await res.json();
+  if (!j.success) return;
+  const list = j.data;
+  const container = document.getElementById('activity-feed');
+  if (!list.length) { container.innerHTML = '<p class="text-center py-10 text-slate-400 italic text-xs">No activity logged.</p>'; return; }
+
+  container.innerHTML = list.slice(0, 10).map(t => {
+    const isDeduction = t.quantity_change < 0;
+    const time = new Date(t.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    return `
+      <div class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors border-l-2 border-transparent hover:border-indigo-100">
+        <span class="material-symbols-outlined text-sm ${isDeduction ? 'text-rose-500' : 'text-emerald-500'}">
+          ${t.transaction_type === 'SALE' ? 'shopping_bag' : t.transaction_type === 'RESTOCK' ? 'add_box' : 'edit'}
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-[10px] sm:text-xs font-medium text-on-surface truncate">
+            <span class="font-bold">${t.transaction_type}</span>: ${t.product_name}
+          </p>
+          <div class="flex justify-between items-center text-[9px] text-slate-400">
+             <span>Qty: ${t.quantity_change > 0 ? '+' : ''}${t.quantity_change}</span>
+             <span>${time}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadProjections() {
+  const res = await fetch(API + '/api/analytics/forecast');
+  const j = await res.json();
+  if (!j.success) return;
+  const list = j.data.filter(p => p.estimated_days_until_oos !== null).sort((a,b) => a.estimated_days_until_oos - b.estimated_days_until_oos);
+  const container = document.getElementById('burn-list');
+  if (!list.length) { container.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs">Establish sales history to see projections.</p>'; return; }
+
+  container.innerHTML = list.slice(0, 5).map(p => {
+    const days = p.estimated_days_until_oos;
+    const color = days < 7 ? 'text-error' : days < 15 ? 'text-amber-600' : 'text-slate-700';
+    return `
+      <div class="p-3 bg-surface rounded-xl">
+        <div class="flex justify-between items-start mb-1">
+          <p class="text-xs font-bold truncate pr-2">${p.product_name}</p>
+          <p class="text-[10px] font-black ${color} whitespace-nowrap">${days} Days Left</p>
+        </div>
+        <div class="flex justify-between items-center text-[9px] text-slate-400">
+          <span>Burn: ${p.avg_daily_burn_rate}/day</span>
+          <span>Stock: ${p.current_stock}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadAll() { 
+  loadStats(); 
+  loadDistributors(); 
+  loadAlerts(); 
+  loadActivity(); 
+  loadProjections();
+}
 loadAll();
 
 // Mobile Sidebar Toggle
