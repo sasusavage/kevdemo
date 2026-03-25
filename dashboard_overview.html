@@ -162,15 +162,15 @@ Refresh Data
 <!-- Charts Row -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 <!-- Revenue Timeline -->
-<div class="xl:col-span-2 bg-surface-container-lowest p-8 rounded-xl">
+<div class="xl:col-span-2 bg-surface-container-lowest p-4 sm:p-8 rounded-xl">
 <div class="flex justify-between items-center mb-10">
 <div><h4 class="font-['Manrope'] font-bold text-xl">Revenue Trends</h4>
-<p class="text-sm text-secondary">Monthly revenue over the past 12 months.</p></div>
+<p class="text-sm text-secondary">Timeline overview for the current year.</p></div>
 </div>
-<div id="chart-container" class="h-64 flex items-end justify-between gap-1 sm:gap-2 px-1 sm:px-2 overflow-x-auto min-w-[500px]">
-<p class="text-slate-400 italic">Loading chart...</p>
+<div id="chart-container" class="h-64 flex items-end justify-between gap-1 sm:gap-2 px-1 sm:px-2 w-full">
+<p class="text-slate-400 italic">Formatting analytics...</p>
 </div>
-<div id="chart-labels" class="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter min-w-[500px] overflow-x-auto"></div>
+<div id="chart-labels" class="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter w-full"></div>
 </div>
 
 <!-- Distributor Volume -->
@@ -231,16 +231,24 @@ async function loadStats() {
   // Revenue chart
   const timeline = d.monthly_timeline;
   if (timeline.length) {
-    const maxRev = Math.max(...timeline.map(t => t.revenue));
+    const maxRev = Math.max(...timeline.map(t => t.revenue), 100);
     const container = document.getElementById('chart-container');
     container.innerHTML = timeline.map(t => {
-      const h = Math.max(5, (t.revenue / maxRev) * 100);
-      return `<div class="flex-1 flex flex-col items-center gap-1">
-        <span class="text-[9px] font-bold text-slate-500">${fmtShort(t.revenue)}</span>
-        <div class="w-full bg-primary rounded-t-lg transition-all duration-500" style="height:${h}%"></div>
+      // Small minimum height (2px) so 0-months still show a tiny line
+      const h = Math.max(2, (t.revenue / maxRev) * 100);
+      const colorClass = t.revenue > 0 ? 'bg-primary' : 'bg-slate-100';
+      return `<div class="flex-1 flex flex-col items-center gap-1 group">
+        <span class="text-[7px] sm:text-[9px] font-bold text-slate-400 group-hover:text-primary transition-colors">${t.revenue > 0 ? fmtShort(t.revenue) : '0'}</span>
+        <div class="w-full ${colorClass} rounded-t-sm sm:rounded-t-lg transition-all duration-700" style="height:${h}%"></div>
       </div>`;
     }).join('');
-    document.getElementById('chart-labels').innerHTML = timeline.map(t => `<span>${months[t.month-1]}</span>`).join('');
+    
+    // Responsive month labels
+    const isMobile = window.innerWidth < 640;
+    document.getElementById('chart-labels').innerHTML = timeline.map(t => {
+      const name = months[t.month-1];
+      return `<span>${isMobile ? name[0] : name}</span>`;
+    }).join('');
   }
 }
 

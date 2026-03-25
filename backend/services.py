@@ -554,32 +554,39 @@ def get_sales_stats():
         .scalar()
     )
 
-    # Monthly revenue timeline (last 12 months)
-    twelve_months_ago = (now - timedelta(days=365)).replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    )
-    monthly_timeline = (
+    # Monthly revenue timeline (Jan to Dec of the current year)
+    current_year = now.year
+    
+    monthly_data = (
         db.session.query(
-            extract("year", Sale.timestamp).label("year"),
             extract("month", Sale.timestamp).label("month"),
             func.sum(Sale.total_price).label("revenue"),
             func.sum(Sale.quantity_sold).label("volume"),
         )
-        .filter(Sale.timestamp >= twelve_months_ago)
-        .group_by("year", "month")
-        .order_by("year", "month")
+        .filter(extract("year", Sale.timestamp) == current_year)
+        .group_by("month")
+        .order_by("month")
         .all()
     )
-
+    
+    data_map = {int(r.month): r for r in monthly_data}
     timeline = []
-    for i, row in enumerate(monthly_timeline):
-        prev_rev = float(monthly_timeline[i - 1].revenue) if i > 0 else 0
-        growth = calculate_growth_trend(float(row.revenue), prev_rev)
+    
+    # Always return 12 months (Jan to Dec)
+    for month_idx in range(1, 13):
+        row = data_map.get(month_idx)
+        rev = float(row.revenue) if row else 0.0
+        vol = int(row.volume) if row else 0
+        
+        # Calculate growth relative to previous month in the timeline
+        prev_rev = timeline[-1]["revenue"] if month_idx > 1 else 0.0
+        growth = calculate_growth_trend(rev, prev_rev)
+        
         timeline.append({
-            "year": int(row.year),
-            "month": int(row.month),
-            "revenue": float(row.revenue),
-            "volume": int(row.volume),
+            "year": current_year,
+            "month": month_idx,
+            "revenue": rev,
+            "volume": vol,
             "growth_percent": growth,
         })
 
