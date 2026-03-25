@@ -237,7 +237,7 @@ async function loadStats() {
       // Small minimum height (2px) so 0-months still show a tiny line
       const h = Math.max(2, (t.revenue / maxRev) * 100);
       const colorClass = t.revenue > 0 ? 'bg-primary' : 'bg-slate-100';
-      return `<div class="flex-1 flex flex-col items-center gap-1 group">
+      return `<div class="flex-1 h-full flex flex-col items-center justify-end gap-1 group">
         <span class="text-[7px] sm:text-[9px] font-bold text-slate-400 group-hover:text-primary transition-colors">${t.revenue > 0 ? fmtShort(t.revenue) : '0'}</span>
         <div class="w-full ${colorClass} rounded-t-sm sm:rounded-t-lg transition-all duration-700" style="height:${h}%"></div>
       </div>`;
