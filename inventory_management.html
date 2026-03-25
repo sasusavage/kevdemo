@@ -48,7 +48,7 @@
 <body class="bg-surface text-on-surface">
 
 <!-- SideNavBar -->
-<aside class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 w-64 border-r border-slate-200/10 dark:border-slate-800/10 z-50">
+<aside id="sidebar" class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 w-64 border-r border-slate-200/10 dark:border-slate-800/10 z-[60] transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 <div class="flex items-center gap-3 px-2">
 <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
 <span class="material-symbols-outlined">polyline</span>
@@ -87,8 +87,11 @@ Create Report
 </aside>
 
 <!-- TopAppBar -->
-<header class="fixed top-0 right-0 left-64 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl z-40 flex justify-between items-center px-8 border-b border-slate-200/20 dark:border-slate-800/20 shadow-sm">
-<div class="flex items-center gap-4 flex-1 max-w-xl">
+<header class="fixed top-0 right-0 left-0 lg:left-64 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl z-40 flex justify-between items-center px-4 lg:px-8 border-b border-slate-200/20 dark:border-slate-800/20 shadow-sm">
+<div class="flex items-center gap-2 sm:gap-4 flex-1 max-w-xl">
+<button id="mobile-menu-btn" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex-shrink-0">
+<span class="material-symbols-outlined">menu</span>
+</button>
 <div class="relative w-full">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
 <input id="search-input" class="w-full bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 placeholder:text-slate-400" placeholder="Search inventory by SKU or name..." type="text"/>
@@ -107,8 +110,8 @@ Create Report
 </header>
 
 <!-- Main Canvas -->
-<main class="ml-64 pt-24 px-12 pb-12 min-h-screen">
-<div class="flex justify-between items-end mb-10">
+<main class="lg:ml-64 pt-24 px-4 sm:px-8 lg:px-12 pb-12 min-h-screen">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-10">
 <div>
 <h1 class="text-4xl font-extrabold tracking-tighter text-on-surface mb-2">Inventory Management</h1>
 <p class="text-on-surface-variant text-sm">Real-time oversight of precision curated hardware and consumables.</p>
@@ -120,7 +123,7 @@ Record Sale
 </div>
 
 <!-- Metrics -->
-<div class="grid grid-cols-4 gap-6 mb-12">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
 <div class="col-span-1 bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary">
 <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total SKU Count</p>
 <h2 id="total-sku" class="text-3xl font-headline font-bold text-indigo-900">--</h2>
@@ -149,7 +152,7 @@ Record Sale
 
 <!-- Table -->
 <div class="bg-surface-container-low rounded-2xl p-1 pb-1">
-<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-x-auto">
 <table class="w-full text-left border-separate border-spacing-0">
 <thead>
 <tr class="bg-surface-container-high">
@@ -286,6 +289,19 @@ async function loadDistributors() {
 document.getElementById('search-input').addEventListener('input', (e) => {
   const q = e.target.value.toLowerCase();
   renderTable(allProducts.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)));
+});
+
+// Mobile Sidebar
+const sidebar = document.getElementById('sidebar');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+mobileMenuBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('-translate-x-full');
+});
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+  if (window.innerWidth < 1024 && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+    sidebar.classList.add('-translate-x-full');
+  }
 });
 
 // Modal

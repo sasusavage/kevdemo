@@ -48,7 +48,7 @@
 <body class="text-on-surface">
 
 <!-- SideNavBar -->
-<aside class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 border-r border-slate-200/10 dark:border-slate-800/10 w-64 z-50">
+<aside id="sidebar" class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 border-r border-slate-200/10 dark:border-slate-800/10 w-64 z-[60] transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 <div class="flex items-center gap-3 px-2">
 <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white overflow-hidden">
 <span class="material-symbols-outlined">polyline</span>
@@ -88,10 +88,13 @@
 </aside>
 
 <!-- Main Content -->
-<main class="ml-64 min-h-screen bg-surface">
-<header class="sticky top-0 z-40 flex justify-between items-center px-8 py-3 w-full border-b border-slate-200/20 bg-white/80 backdrop-blur-xl shadow-sm">
-<div class="flex items-center gap-8">
-<span class="font-['Manrope'] font-bold text-xl tracking-tighter text-indigo-700">Inventory Insights</span>
+<main class="lg:ml-64 min-h-screen bg-surface overflow-x-hidden">
+<header class="sticky top-0 z-40 flex justify-between items-center px-4 lg:px-8 py-3 w-full border-b border-slate-200/20 bg-white/80 backdrop-blur-xl shadow-sm">
+<div class="flex items-center gap-2 sm:gap-8">
+<button id="mobile-menu-btn" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex-shrink-0">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-['Manrope'] font-bold text-xl tracking-tighter text-indigo-700 hidden sm:block">Inventory Insights</span>
 </div>
 <div class="flex items-center gap-4">
 <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors active:scale-95">
@@ -103,10 +106,11 @@
 <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">A</div>
 </div>
 </div>
+</div>
 </header>
 
-<div class="p-10 space-y-10">
-<div class="flex justify-between items-end">
+<div class="p-4 sm:p-10 space-y-10">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
 <div>
 <h1 class="font-['Manrope'] font-extrabold text-4xl tracking-tight text-on-surface">System Overview</h1>
 <p class="text-secondary mt-1 font-['Inter']">Welcome back, Curator. Here is your precision performance data.</p>
@@ -163,10 +167,10 @@ Refresh Data
 <div><h4 class="font-['Manrope'] font-bold text-xl">Revenue Trends</h4>
 <p class="text-sm text-secondary">Monthly revenue over the past 12 months.</p></div>
 </div>
-<div id="chart-container" class="h-64 flex items-end justify-between gap-2 px-2">
+<div id="chart-container" class="h-64 flex items-end justify-between gap-1 sm:gap-2 px-1 sm:px-2 overflow-x-auto min-w-[500px]">
 <p class="text-slate-400 italic">Loading chart...</p>
 </div>
-<div id="chart-labels" class="flex justify-between mt-6 px-2 text-[10px] uppercase font-bold text-slate-400 tracking-tighter"></div>
+<div id="chart-labels" class="flex justify-between mt-6 px-1 sm:px-2 text-[8px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter min-w-[500px] overflow-x-auto"></div>
 </div>
 
 <!-- Distributor Volume -->
@@ -264,5 +268,19 @@ async function loadDistributors() {
 
 function loadAll() { loadStats(); loadDistributors(); }
 loadAll();
+
+// Mobile Sidebar Toggle
+const sidebar = document.getElementById('sidebar');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+mobileMenuBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('-translate-x-full');
+});
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+  if (window.innerWidth < 1024 && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+    sidebar.classList.add('-translate-x-full');
+  }
+});
+
 </script>
 </body></html>

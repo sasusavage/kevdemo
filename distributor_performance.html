@@ -46,7 +46,7 @@
 <body class="bg-surface text-on-surface antialiased">
 
 <!-- SideNavBar -->
-<aside class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 w-64 border-r border-slate-200/10 dark:border-slate-800/10 z-50">
+<aside id="sidebar" class="fixed left-0 top-0 flex flex-col h-full py-6 px-4 gap-8 bg-slate-50 dark:bg-slate-900 w-64 border-r border-slate-200/10 dark:border-slate-800/10 z-[60] transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 <div class="flex items-center gap-3 px-2">
 <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
 <span class="material-symbols-outlined">polyline</span>
@@ -75,10 +75,13 @@
 </aside>
 
 <!-- Main Content -->
-<main class="ml-64 min-h-screen">
-<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 py-3 w-full border-b border-slate-200/20 shadow-sm">
-<div class="flex items-center gap-6 flex-1">
-<h1 class="font-['Manrope'] font-bold text-xl tracking-tighter text-indigo-700 whitespace-nowrap">Inventory Insights</h1>
+<main class="lg:ml-64 min-h-screen overflow-x-hidden">
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl flex justify-between items-center px-4 sm:px-8 py-3 w-full border-b border-slate-200/20 shadow-sm">
+<div class="flex items-center gap-2 sm:gap-6 flex-1">
+<button id="mobile-menu-btn" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg flex-shrink-0">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-['Manrope'] font-bold text-xl tracking-tighter text-indigo-700 hidden sm:block">Inventory Insights</h1>
 <div class="relative w-full max-w-md ml-4">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
 <input id="search-dist" class="w-full bg-slate-100/50 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 transition-all" placeholder="Search distributors..." type="text"/>
@@ -94,12 +97,12 @@
 </div>
 </header>
 
-<div class="p-10 space-y-10">
+<div class="p-4 sm:p-10 space-y-10">
 <!-- Header -->
-<section class="flex justify-between items-end">
+<section class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
 <div>
-<h2 class="text-4xl font-extrabold tracking-tight font-headline text-on-surface mb-2">Distributor Performance</h2>
-<p class="text-secondary max-w-xl">Real-time analysis of distribution channels. Monitoring sales velocity, revenue impact, and growth trends.</p>
+<h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight font-headline text-on-surface mb-2">Distributor Performance</h2>
+<p class="text-secondary max-w-xl text-sm sm:text-base">Real-time analysis of distribution channels. Monitoring sales velocity, revenue impact, and growth trends.</p>
 </div>
 </section>
 
@@ -128,15 +131,17 @@
 </div>
 
 <!-- Distributor List -->
-<div class="space-y-4">
-<div class="grid grid-cols-12 px-8 py-3 bg-surface-container-high rounded-full">
+<div class="space-y-4 overflow-x-auto pb-4">
+<div class="min-w-[800px]">
+<div class="grid grid-cols-12 px-8 py-3 bg-surface-container-high rounded-full w-full">
 <div class="col-span-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Distributor Entity</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Sales Volume</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Revenue</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Growth</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-right pr-4">Tier</div>
 </div>
-<div id="dist-list"><p class="px-8 py-6 text-slate-400 italic">Loading distributors...</p></div>
+<div id="dist-list" class="mt-4"><p class="px-8 py-6 text-slate-400 italic">Loading distributors...</p></div>
+</div>
 </div>
 </div>
 </main>
@@ -214,5 +219,18 @@ document.getElementById('search-dist').addEventListener('input', e => {
 });
 
 loadPerformance();
+
+// Mobile Sidebar Toggle
+const sidebar = document.getElementById('sidebar');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+mobileMenuBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('-translate-x-full');
+});
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+  if (window.innerWidth < 1024 && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+    sidebar.classList.add('-translate-x-full');
+  }
+});
 </script>
 </body></html>
