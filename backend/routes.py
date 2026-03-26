@@ -15,6 +15,7 @@ Endpoints:
   GET  /api/reports                - Custom filterable reports
 """
 from flask import Blueprint, request, jsonify
+from datetime import datetime
 import services
 
 api = Blueprint("api", __name__, url_prefix="/api")
@@ -35,6 +36,24 @@ def get_inventory():
             "data": items,
             "summary": summary,
         }), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@api.route("/products", methods=["POST"])
+def create_product():
+    """
+    Register a new product in the system.
+    Body: { name, sku, category, price, quantity, min_stock_level }
+    """
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"success": False, "error": "JSON body required"}), 400
+    try:
+        product = services.create_product(payload)
+        return jsonify({"success": True, "data": product}), 201
+    except ValueError as ve:
+        return jsonify({"success": False, "error": str(ve)}), 400
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -249,25 +268,18 @@ def get_daily_summary():
 #  CUSTOM REPORTS
 # ══════════════════════════════════════════════
 
-@api.route("/reports", methods=["GET"])
-def get_reports():
-    """
-    Custom filterable performance reports.
-
-    Query params:
-      - start_date : YYYY-MM-DD
-      - end_date   : YYYY-MM-DD
-      - category   : product category (partial match)
-      - distributor_id : int
-    """
+@api.route("/reports/excel", methods=["GET"])
+def get_excel_report():
+    """Download a complete Excel report of inventory and sales."""
+    from flask import send_file
     try:
-        report = services.generate_report(
-            start_date=request.args.get("start_date"),
-            end_date=request.args.get("end_date"),
-            category=request.args.get("category"),
-            distributor_id=request.args.get("distributor_id", type=int),
+        excel_data = services.export_to_excel()
+        return send_file(
+            excel_data,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"Prism_Report_{datetime.now().strftime('%Y%m%d')}.xlsx"
         )
-        return jsonify({"success": True, **report}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 

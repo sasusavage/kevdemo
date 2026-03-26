@@ -209,6 +209,90 @@ def get_stock_transactions(product_id: int | None = None, limit: int = 50):
 #  ANALYTICS & FORECASTING
 # ══════════════════════════════════════════════
 
+def create_product(data: dict):
+    """Register a new SKU in the database."""
+    name = data.get("name")
+    sku = data.get("sku")
+    price = data.get("price", 0.0)
+    quantity = data.get("quantity", 0)
+    category = data.get("category", "General")
+    min_stock = data.get("min_stock_level", 20)
+    
+    if not name or not sku:
+        raise ValueError("Product Name and SKU are required.")
+    
+    # Check if SKU already exists
+    existing = Product.query.filter_by(sku=sku).first()
+    if existing:
+        raise ValueError(f"SKU '{sku}' is already registered.")
+        
+    p = Product(
+        name=name,
+        sku=sku,
+        price=price,
+        quantity=quantity,
+        category=category,
+        min_stock_level=min_stock
+    )
+    db.session.add(p)
+    
+    # Log initial inventory as a 'RESTOCK' if qty > 0
+    if quantity > 0:
+        db.session.flush()
+        txn = StockTransaction(
+            product_id=p.id,
+            transaction_type="RESTOCK",
+            quantity_change=quantity,
+            quantity_before=0,
+            quantity_after=quantity,
+            reason="Initial stock on registration"
+        )
+        db.session.add(txn)
+        
+    db.session.commit()
+    return p.to_dict()
+
+
+def export_to_excel():
+    """Generate a multi-sheet Excel report of the entire system."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill
+    from io import BytesIO
+    
+    wb = openpyxl.Workbook()
+    
+    # --- Sheet 1: Inventory ---
+    ws1 = wb.active
+    ws1.title = "Current Inventory"
+    headers = ["ID", "Name", "SKU", "Quantity", "Price (GHC)", "Category", "Min Stock", "Status"]
+    ws1.append(headers)
+    
+    products = Product.query.order_by(Product.name).all()
+    for p in products:
+        ws1.append([p.id, p.name, p.sku, p.quantity, float(p.price), p.category, p.min_stock_level, p.stock_status])
+        
+    # --- Sheet 2: Recent Sales ---
+    ws2 = wb.create_sheet("Sales Ledger")
+    ws2.append(["ID", "Timestamp", "Product", "Distributor", "Qty Sold", "Total (GHC)"])
+    sales = Sale.query.order_by(Sale.timestamp.desc()).limit(1000).all()
+    for s in sales:
+        ws2.append([s.id, s.timestamp.strftime("%Y-%m-%d %H:%M"), s.product.name, s.distributor.name, s.quantity_sold, float(s.total_price)])
+        
+    # Formatting
+    header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+    white_font = Font(color="FFFFFF", bold=True)
+    
+    for ws in wb.worksheets:
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = white_font
+            
+    # Save to BytesIO
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
 def get_forecast():
     """
     For each product, calculate:
