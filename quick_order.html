@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quick Order | Prism Portal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "outline":"#777587","surface-container":"#eceef0","on-secondary":"#ffffff",
+          "on-background":"#191c1e","on-primary":"#ffffff","primary-container":"#4f46e5",
+          "primary-fixed":"#e2dfff","error-container":"#ffdad6","surface-container-high":"#e6e8ea",
+          "outline-variant":"#c7c4d8","surface":"#f7f9fb","primary":"#3525cd",
+          "secondary":"#515f74","on-surface":"#191c1e","surface-container-highest":"#e0e3e5",
+          "on-surface-variant":"#464555","background":"#f7f9fb",
+          "surface-container-lowest":"#ffffff","error":"#ba1a1a",
+        },
+        fontFamily: {"headline":["Manrope"],"body":["Inter"]},
+        borderRadius: {"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+</style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col items-center justify-center px-4 py-12">
+
+<!-- Header -->
+<div class="mb-10 text-center">
+  <div class="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
+    <span class="material-symbols-outlined text-white text-3xl">shopping_bag</span>
+  </div>
+  <h1 class="font-['Manrope'] font-bold text-3xl tracking-tight text-on-surface">Quick Order</h1>
+  <p class="text-secondary text-sm mt-2">Submit your order in seconds — we'll handle the rest.</p>
+</div>
+
+<!-- Card -->
+<div class="w-full max-w-md bg-surface-container-lowest rounded-xl shadow-sm p-8">
+
+  <!-- Distributor badge (populated from ?ref) -->
+  <div id="dist-badge" class="hidden mb-6 flex items-center gap-3 bg-primary-fixed rounded-xl px-5 py-4">
+    <div id="dist-avatar" class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shrink-0"></div>
+    <div>
+      <p class="text-xs font-semibold text-secondary uppercase tracking-wider">Ordering for</p>
+      <p id="dist-name" class="font-['Manrope'] font-bold text-on-surface text-base"></p>
+    </div>
+  </div>
+
+  <form id="order-form" class="space-y-5" novalidate>
+
+    <!-- Ref (hidden, auto-filled) -->
+    <input type="hidden" id="ref" name="ref"/>
+
+    <!-- SKU -->
+    <div>
+      <label for="sku" class="block text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Product SKU</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-xl">inventory_2</span>
+        <input
+          id="sku" name="sku" type="text" required autocomplete="off"
+          placeholder="e.g. PRD-001"
+          class="w-full pl-10 pr-4 py-3 bg-surface-container rounded-xl border border-transparent focus:outline-none focus:border-primary focus:bg-white text-sm font-medium transition"
+        />
+      </div>
+      <p id="sku-error" class="hidden mt-1.5 text-xs text-error">Please enter a valid SKU.</p>
+    </div>
+
+    <!-- Quantity -->
+    <div>
+      <label for="quantity" class="block text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Quantity</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-xl">numbers</span>
+        <input
+          id="quantity" name="quantity" type="number" min="1" required
+          placeholder="e.g. 10"
+          class="w-full pl-10 pr-4 py-3 bg-surface-container rounded-xl border border-transparent focus:outline-none focus:border-primary focus:bg-white text-sm font-medium transition"
+        />
+      </div>
+      <p id="qty-error" class="hidden mt-1.5 text-xs text-error">Please enter a quantity of at least 1.</p>
+    </div>
+
+    <!-- Optional ref override (shown if no ?ref param) -->
+    <div id="ref-field" class="hidden">
+      <label for="ref-input" class="block text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Distributor Ref</label>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-xl">badge</span>
+        <input
+          id="ref-input" type="text"
+          placeholder="e.g. D5"
+          class="w-full pl-10 pr-4 py-3 bg-surface-container rounded-xl border border-transparent focus:outline-none focus:border-primary focus:bg-white text-sm font-medium transition"
+        />
+      </div>
+      <p class="mt-1.5 text-xs text-secondary">Your distributor code — shared by your sales rep.</p>
+      <p id="ref-error" class="hidden mt-1 text-xs text-error">Please enter your distributor ref (e.g. D5).</p>
+    </div>
+
+    <!-- Submit -->
+    <button
+      id="submit-btn" type="submit"
+      class="w-full mt-2 py-3.5 bg-primary text-white font-['Manrope'] font-bold text-sm rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+    >
+      <span class="material-symbols-outlined text-xl">send</span>
+      Place Order
+    </button>
+
+  </form>
+
+  <!-- Success state -->
+  <div id="success-state" class="hidden text-center py-4">
+    <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-emerald-600 text-4xl">check_circle</span>
+    </div>
+    <h2 class="font-['Manrope'] font-bold text-xl mb-2">Order Received!</h2>
+    <p class="text-secondary text-sm mb-6">Your order has been logged successfully.</p>
+    <div id="order-summary" class="bg-surface-container rounded-xl p-4 text-left text-sm space-y-2 mb-6"></div>
+    <button
+      onclick="resetForm()"
+      class="text-sm font-bold text-primary hover:underline flex items-center gap-1 mx-auto"
+    >
+      <span class="material-symbols-outlined text-base">add_circle</span>Place another order
+    </button>
+  </div>
+
+  <!-- Error banner -->
+  <div id="error-banner" class="hidden mt-4 bg-error-container rounded-xl px-5 py-4 flex items-start gap-3">
+    <span class="material-symbols-outlined text-error text-xl shrink-0 mt-0.5">error</span>
+    <p id="error-text" class="text-sm text-error font-medium"></p>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<p class="mt-8 text-xs text-secondary opacity-60">Prism Portal &mdash; Powered by AI-driven inventory intelligence</p>
+
+<script>
+const API = window.location.origin;
+
+// ── Pre-fill from ?ref query param ──────────────────────────────────────────
+(function prefill() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (!ref) {
+    document.getElementById('ref-field').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('ref').value = ref;
+  loadDistributorName(ref);
+})();
+
+async function loadDistributorName(ref) {
+  // Derive distributor id from ref "D{id}"
+  const match = ref.match(/^[Dd](\d+)$/);
+  if (!match) return;
+  try {
+    const res = await fetch(`${API}/api/performance`);
+    const j = await res.json();
+    if (!j.success) return;
+    const dist = (j.data || []).find(d => d.id === parseInt(match[1]));
+    if (!dist) return;
+    const badge = document.getElementById('dist-badge');
+    document.getElementById('dist-name').textContent = dist.name;
+    document.getElementById('dist-avatar').textContent = dist.name.charAt(0).toUpperCase();
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+  } catch (_) {}
+}
+
+// ── Form submission ──────────────────────────────────────────────────────────
+document.getElementById('order-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  clearErrors();
+
+  const sku = document.getElementById('sku').value.trim();
+  const qty = parseInt(document.getElementById('quantity').value);
+  let ref = document.getElementById('ref').value.trim();
+
+  // If ref was not auto-filled, read from manual field
+  if (!ref) {
+    ref = document.getElementById('ref-input').value.trim();
+  }
+
+  // Validate
+  let valid = true;
+  if (!sku) { show('sku-error'); valid = false; }
+  if (!qty || qty < 1) { show('qty-error'); valid = false; }
+  if (!ref) { show('ref-error'); valid = false; }
+  if (!valid) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-xl">progress_activity</span> Placing order...';
+
+  try {
+    const res = await fetch(`${API}/api/quick-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref, sku, quantity: qty }),
+    });
+    const j = await res.json();
+
+    if (j.success) {
+      showSuccess(j.data, sku, qty);
+    } else {
+      showError(j.error || 'Something went wrong. Please try again.');
+      resetBtn();
+    }
+  } catch (err) {
+    showError('Network error — please check your connection and try again.');
+    resetBtn();
+  }
+});
+
+function showSuccess(sale, sku, qty) {
+  document.getElementById('order-form').classList.add('hidden');
+  document.getElementById('error-banner').classList.add('hidden');
+  const summary = document.getElementById('order-summary');
+  summary.innerHTML = `
+    <div class="flex justify-between"><span class="text-secondary">SKU</span><span class="font-bold">${sku.toUpperCase()}</span></div>
+    <div class="flex justify-between"><span class="text-secondary">Quantity</span><span class="font-bold">${qty}</span></div>
+    ${sale.total_price ? `<div class="flex justify-between"><span class="text-secondary">Total</span><span class="font-bold">GHC ${Number(sale.total_price).toLocaleString('en-US', {minimumFractionDigits:2})}</span></div>` : ''}
+    ${sale.timestamp ? `<div class="flex justify-between"><span class="text-secondary">Logged at</span><span class="font-medium text-xs">${new Date(sale.timestamp).toLocaleString()}</span></div>` : ''}
+  `;
+  document.getElementById('success-state').classList.remove('hidden');
+}
+
+function showError(msg) {
+  const banner = document.getElementById('error-banner');
+  document.getElementById('error-text').textContent = msg;
+  banner.classList.remove('hidden');
+}
+
+function clearErrors() {
+  ['sku-error','qty-error','ref-error'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('error-banner').classList.add('hidden');
+}
+
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+
+function resetBtn() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-symbols-outlined text-xl">send</span> Place Order';
+}
+
+function resetForm() {
+  document.getElementById('success-state').classList.add('hidden');
+  document.getElementById('order-form').classList.remove('hidden');
+  document.getElementById('sku').value = '';
+  document.getElementById('quantity').value = '';
+  clearErrors();
+}
+</script>
+</body>
+</html>

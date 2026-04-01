@@ -107,7 +107,7 @@
 </section>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
 <div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden">
 <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
 <p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Total Distributors</p>
@@ -128,21 +128,56 @@
 <p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Avg. Growth</p>
 <h3 id="stat-avg-growth" class="text-3xl font-extrabold font-headline">--</h3>
 </div>
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-violet-400"></div>
+<p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Total Commissions</p>
+<h3 id="stat-total-commissions" class="text-3xl font-extrabold font-headline">--</h3>
+</div>
 </div>
 
 <!-- Distributor List -->
 <div class="space-y-4 overflow-x-auto pb-4">
-<div class="min-w-[800px]">
+<div class="min-w-[900px]">
 <div class="grid grid-cols-12 px-8 py-3 bg-surface-container-high rounded-full w-full">
-<div class="col-span-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Distributor Entity</div>
+<div class="col-span-3 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Distributor Entity</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Sales Volume</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Revenue</div>
+<div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Commissions</div>
 <div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-center">Growth</div>
-<div class="col-span-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-right pr-4">Tier</div>
+<div class="col-span-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em] text-right pr-4">Tier</div>
 </div>
 <div id="dist-list" class="mt-4"><p class="px-8 py-6 text-slate-400 italic">Loading distributors...</p></div>
 </div>
 </div>
+
+<!-- Commissions Ledger -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+  <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+    <div>
+      <h3 class="font-['Manrope'] font-bold text-xl">Commissions Ledger</h3>
+      <p class="text-secondary text-sm mt-1">Commission rates and cumulative earnings per distributor partner.</p>
+    </div>
+    <span class="material-symbols-outlined text-violet-400 text-3xl">account_balance_wallet</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[700px]">
+      <thead>
+        <tr class="border-b border-slate-100">
+          <th class="text-left px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Distributor</th>
+          <th class="text-left px-4 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Ref Code</th>
+          <th class="text-center px-4 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Rate</th>
+          <th class="text-right px-4 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Total Earned</th>
+          <th class="text-right px-4 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">On Revenue</th>
+          <th class="text-right px-8 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.1em]">Order Link</th>
+        </tr>
+      </thead>
+      <tbody id="commissions-ledger">
+        <tr><td colspan="6" class="px-8 py-8 text-slate-400 italic text-sm text-center">Loading ledger...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 </div>
 </main>
 
@@ -165,6 +200,7 @@ async function loadPerformance() {
 
   const totalVol = allDist.reduce((s,d) => s + d.total_volume, 0);
   const totalRev = allDist.reduce((s,d) => s + d.total_revenue, 0);
+  const totalComm = allDist.reduce((s,d) => s + (d.total_commissions || 0), 0);
   const growths = allDist.filter(d => d.growth_percent !== 0).map(d => d.growth_percent);
   const avgGrowth = growths.length ? (growths.reduce((s,g)=>s+g,0)/growths.length).toFixed(1) : '0.0';
 
@@ -172,8 +208,10 @@ async function loadPerformance() {
   document.getElementById('stat-total-vol').textContent = totalVol.toLocaleString();
   document.getElementById('stat-total-rev').textContent = fmtShort(totalRev);
   document.getElementById('stat-avg-growth').textContent = (avgGrowth >= 0 ? '+' : '') + avgGrowth + '%';
+  document.getElementById('stat-total-commissions').textContent = fmtShort(totalComm);
 
   renderList(allDist);
+  renderLedger(allDist);
 }
 
 function renderList(data) {
@@ -184,8 +222,9 @@ function renderList(data) {
     const gColor = g >= 0 ? 'text-green-600' : 'text-error';
     const gIcon = g >= 0 ? 'north_east' : 'south_east';
     const initial = d.name.charAt(0).toUpperCase();
+    const comm = d.total_commissions || 0;
     return `<div class="grid grid-cols-12 items-center px-8 py-6 bg-surface-container-lowest rounded-xl hover:bg-primary-fixed/30 transition-all duration-300 group cursor-pointer border-l-4 border-transparent hover:border-primary">
-      <div class="col-span-4 flex items-center gap-4">
+      <div class="col-span-3 flex items-center gap-4">
         <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg">${initial}</div>
         <div>
           <h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">${d.name}</h4>
@@ -201,14 +240,62 @@ function renderList(data) {
       <div class="col-span-2 text-center">
         <span class="text-sm font-bold font-headline">${fmtShort(d.total_revenue)}</span>
       </div>
+      <div class="col-span-2 text-center">
+        <span class="text-sm font-bold text-violet-600">${fmtShort(comm)}</span>
+        <p class="text-[10px] text-slate-400 mt-0.5">${(d.commission_rate * 100).toFixed(1)}% rate</p>
+      </div>
       <div class="col-span-2 flex justify-center items-center gap-1">
         <span class="text-sm font-bold ${gColor}">${g >= 0 ? '+' : ''}${g}%</span>
         <span class="material-symbols-outlined ${gColor} text-lg">${gIcon}</span>
       </div>
-      <div class="col-span-2 flex justify-end pr-4">
-        <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">${d.tier || 'Distributor'}</span>
+      <div class="col-span-1 flex justify-end pr-4">
+        <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">${d.tier || 'Dist'}</span>
       </div>
     </div>`;
+  }).join('');
+}
+
+function renderLedger(data) {
+  const tbody = document.getElementById('commissions-ledger');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="px-8 py-8 text-center text-slate-400 italic text-sm">No distributor data available.</td></tr>';
+    return;
+  }
+  const sorted = [...data].sort((a,b) => (b.total_commissions||0) - (a.total_commissions||0));
+  tbody.innerHTML = sorted.map((d, i) => {
+    const comm = d.total_commissions || 0;
+    const commPct = d.total_revenue > 0 ? ((comm / d.total_revenue) * 100).toFixed(1) : '0.0';
+    const orderLink = window.location.origin + '/order?ref=' + (d.ref_code || 'D' + d.id);
+    const rowBg = i % 2 === 0 ? '' : 'bg-slate-50/50';
+    return `<tr class="${rowBg} hover:bg-primary-fixed/20 transition-colors">
+      <td class="px-8 py-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">${d.name.charAt(0)}</div>
+          <div>
+            <p class="font-semibold text-sm text-on-surface">${d.name}</p>
+            <p class="text-[10px] text-secondary">${d.region || 'Ghana'}</p>
+          </div>
+        </div>
+      </td>
+      <td class="px-4 py-5">
+        <span class="font-mono text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg font-bold">${d.ref_code || 'D' + d.id}</span>
+      </td>
+      <td class="px-4 py-5 text-center">
+        <span class="text-sm font-bold text-violet-600">${(d.commission_rate * 100).toFixed(1)}%</span>
+      </td>
+      <td class="px-4 py-5 text-right">
+        <span class="font-bold text-sm font-headline">${fmtShort(comm)}</span>
+      </td>
+      <td class="px-4 py-5 text-right">
+        <span class="text-xs text-secondary">${commPct}% of rev</span>
+      </td>
+      <td class="px-8 py-5 text-right">
+        <button onclick="navigator.clipboard.writeText('${orderLink}').then(()=>this.textContent='Copied!')"
+          class="text-xs font-bold text-primary hover:text-primary-container transition-colors flex items-center gap-1 ml-auto">
+          <span class="material-symbols-outlined text-sm">link</span>Copy Link
+        </button>
+      </td>
+    </tr>`;
   }).join('');
 }
 

@@ -99,8 +99,13 @@ def record_sale(product_id: int, distributor_id: int, quantity_sold: int,
     product.quantity -= quantity_sold
     qty_after = product.quantity
 
-    total_price = float(product.price) * quantity_sold
-    timestamp = (
+    # Step 3: Record Sale — snapshot cost, profit, and commission at time of sale
+    total_price = product.price * quantity_sold
+    unit_cost = product.cost_price
+    profit = total_price - (unit_cost * quantity_sold)
+    commission_earned = float(total_price) * float(distributor.commission_rate)
+
+    sale_date_dt = (
         datetime.fromisoformat(sale_date)
         if sale_date
         else datetime.now(timezone.utc)
@@ -111,7 +116,10 @@ def record_sale(product_id: int, distributor_id: int, quantity_sold: int,
         distributor_id=distributor_id,
         quantity_sold=quantity_sold,
         total_price=total_price,
-        timestamp=timestamp,
+        unit_cost=unit_cost,
+        profit=profit,
+        commission_earned=commission_earned,
+        timestamp=sale_date_dt,
     )
     db.session.add(sale)
     db.session.flush()  # get sale.id
@@ -125,7 +133,7 @@ def record_sale(product_id: int, distributor_id: int, quantity_sold: int,
         quantity_after=qty_after,
         reason=f"Sale to {distributor.name}",
         reference_id=sale.id,
-        timestamp=timestamp,
+        timestamp=sale_date_dt,
     )
     db.session.add(txn)
     db.session.commit()
@@ -214,6 +222,7 @@ def create_product(data: dict):
     name = data.get("name")
     sku = data.get("sku")
     price = data.get("price", 0.0)
+    cost_price = data.get("cost_price", 0.0) # Added cost_price
     quantity = data.get("quantity", 0)
     category = data.get("category", "General")
     min_stock = data.get("min_stock_level", 20)
@@ -230,6 +239,7 @@ def create_product(data: dict):
         name=name,
         sku=sku,
         price=price,
+        cost_price=cost_price, # Added cost_price
         quantity=quantity,
         category=category,
         min_stock_level=min_stock
@@ -353,7 +363,6 @@ def get_forecast():
             else 9999
         )
     )
-
     return forecasts
 
 
@@ -362,10 +371,7 @@ def get_forecast():
 # ══════════════════════════════════════════════
 
 def get_stock_alerts():
-    """
-    Return products that are below their min_stock_level threshold.
-    Sorted by severity: Critical first, then Low Stock.
-    """
+    """Return products that are below their min_stock_level threshold."""
     products = (
         Product.query
         .filter(Product.quantity <= Product.min_stock_level)
@@ -376,152 +382,80 @@ def get_stock_alerts():
 
 
 def get_daily_summary():
-    """
-    Generate a daily intelligence summary:
-    - Top 3 best-selling products (by volume, last 7 days)
-    - 3 worst-performing distributors (lowest revenue, last 30 days)
-    - Stock alerts count
-    - Total revenue today
-    """
+    """Returns today's revenue, volume, and top products."""
     now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    week_start = now - timedelta(days=7)
     month_start = now - timedelta(days=30)
 
-    # Top 3 best-selling products (last 7 days)
     top_products = (
         db.session.query(
             Product.name,
-            func.sum(Sale.quantity_sold).label("volume"),
-            func.sum(Sale.total_price).label("revenue"),
+            db.func.sum(Sale.quantity_sold).label("volume"),
+            db.func.sum(Sale.total_price).label("revenue"),
         )
-        .join(Sale, Sale.product_id == Product.id)
-        .filter(Sale.timestamp >= week_start)
+        .join(Sale)
+        .filter(Sale.timestamp >= today_start)
         .group_by(Product.name)
-        .order_by(func.sum(Sale.quantity_sold).desc())
-        .limit(3)
-        .all()
+        .order_by(db.func.sum(Sale.total_price).desc())
+        .limit(3).all()
     )
 
-    # 3 worst-performing distributors (last 30 days, lowest revenue)
-    worst_distributors = (
-        db.session.query(
-            Distributor.name,
-            func.coalesce(func.sum(Sale.quantity_sold), 0).label("volume"),
-            func.coalesce(func.sum(Sale.total_price), 0).label("revenue"),
-        )
-        .outerjoin(Sale, and_(
-            Sale.distributor_id == Distributor.id,
-            Sale.timestamp >= month_start,
-        ))
-        .group_by(Distributor.name)
-        .order_by(func.coalesce(func.sum(Sale.total_price), 0).asc())
-        .limit(3)
-        .all()
-    )
-
-    # Today's revenue
-    today_revenue = (
-        db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
-        .filter(Sale.timestamp >= today_start)
-        .scalar()
-    )
-    today_volume = (
-        db.session.query(func.coalesce(func.sum(Sale.quantity_sold), 0))
-        .filter(Sale.timestamp >= today_start)
-        .scalar()
-    )
-
-    # Stock alerts count
-    alert_count = (
-        db.session.query(func.count(Product.id))
-        .filter(Product.quantity <= Product.min_stock_level)
-        .scalar()
-    ) or 0
+    today_revenue = db.session.query(db.func.sum(Sale.total_price)).filter(Sale.timestamp >= today_start).scalar() or 0
+    today_volume = db.session.query(db.func.sum(Sale.quantity_sold)).filter(Sale.timestamp >= today_start).scalar() or 0
+    alert_count = Product.query.filter(Product.quantity <= Product.min_stock_level).count()
 
     return {
         "date": now.strftime("%Y-%m-%d"),
-        "top_3_products": [
-            {"name": r.name, "volume": int(r.volume), "revenue": float(r.revenue)}
-            for r in top_products
-        ],
-        "worst_3_distributors": [
-            {"name": r.name, "volume": int(r.volume), "revenue": float(r.revenue)}
-            for r in worst_distributors
-        ],
+        "top_3_products": [{"name":r.name, "volume":int(r.volume), "revenue":float(r.revenue)} for r in top_products],
         "today_revenue": float(today_revenue),
         "today_volume": int(today_volume),
         "stock_alerts": alert_count,
     }
 
 
-# ══════════════════════════════════════════════
-#  DISTRIBUTOR INTELLIGENCE
-# ══════════════════════════════════════════════
-
 def get_distributor_performance():
-    """
-    Revenue and volume per distributor, plus:
-    - Month-over-month growth
-    - Average order value (AOV)
-    - Order count
-    - Auto-calculated tier (Gold/Silver/Bronze)
-    """
+    """Aggregated metrics for each distributor including profit share."""
     results = (
         db.session.query(
             Distributor.id,
             Distributor.name,
             Distributor.region,
             Distributor.tier,
-            func.coalesce(func.sum(Sale.quantity_sold), 0).label("total_volume"),
-            func.coalesce(func.sum(Sale.total_price), 0).label("total_revenue"),
-            func.count(Sale.id).label("order_count"),
+            Distributor.commission_rate,
+            db.func.coalesce(db.func.sum(Sale.quantity_sold), 0).label("total_volume"),
+            db.func.coalesce(db.func.sum(Sale.total_price), 0).label("total_revenue"),
+            db.func.coalesce(db.func.sum(Sale.profit), 0).label("total_profit"),
+            db.func.coalesce(db.func.sum(Sale.commission_earned), 0).label("total_commissions"),
+            db.func.count(Sale.id).label("order_count"),
         )
-        .outerjoin(Sale, Sale.distributor_id == Distributor.id)
-        .group_by(Distributor.id, Distributor.name, Distributor.region, Distributor.tier)
-        .order_by(func.sum(Sale.total_price).desc().nullslast())
+        .outerjoin(Sale)
+        .group_by(Distributor.id, Distributor.name, Distributor.region, Distributor.tier, Distributor.commission_rate)
+        .order_by(db.func.sum(Sale.total_price).desc().nullslast())
         .all()
     )
-
-    # Calculate monthly revenues for tier ranking
-    now = datetime.now(timezone.utc)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-
-    monthly_revs = (
-        db.session.query(
-            Sale.distributor_id,
-            func.sum(Sale.total_price).label("monthly_revenue"),
-        )
-        .filter(Sale.timestamp >= month_start)
-        .group_by(Sale.distributor_id)
-        .all()
-    )
-    monthly_rev_map = {r.distributor_id: float(r.monthly_revenue) for r in monthly_revs}
 
     performance = []
-    for row in results:
-        growth = _distributor_growth(row.id)
-        total_rev = float(row.total_revenue)
-        order_count = int(row.order_count)
-        aov = round(total_rev / order_count, 2) if order_count > 0 else 0.0
-        monthly_rev = monthly_rev_map.get(row.id, 0.0)
-
-        # Auto-tier based on monthly revenue
-        auto_tier = _calculate_tier(monthly_rev)
+    for r in results:
+        rev = float(r.total_revenue)
+        prof = float(r.total_profit)
+        oc = int(r.order_count)
+        growth = _distributor_growth(r.id)
 
         performance.append({
-            "id": row.id,
-            "name": row.name,
-            "region": row.region,
-            "tier": auto_tier,
-            "total_volume": int(row.total_volume),
-            "total_revenue": total_rev,
-            "order_count": order_count,
-            "avg_order_value": aov,
-            "monthly_revenue": monthly_rev,
+            "id": r.id,
+            "name": r.name,
+            "region": r.region,
+            "tier": _calculate_tier(rev),
+            "commission_rate": float(r.commission_rate),
+            "ref_code": f"D{r.id}",
+            "total_volume": int(r.total_volume),
+            "total_revenue": rev,
+            "total_profit": prof,
+            "total_commissions": float(r.total_commissions),
+            "order_count": oc,
+            "avg_order_value": round(rev / oc, 2) if oc > 0 else 0,
             "growth_percent": growth,
         })
-
     return performance
 
 
@@ -775,3 +709,95 @@ def generate_report(start_date: str | None = None, end_date: str | None = None,
         },
         "data": report_data,
     }
+
+
+# ══════════════════════════════════════════════
+#  REVENUE GROWTH TRENDS
+# ══════════════════════════════════════════════
+
+def get_sales_trends():
+    """
+    Revenue-focused trend data for the Growth Trends chart.
+
+    Returns:
+    - weekly_revenue / monthly_revenue with WoW and MoM % growth
+    - daily_breakdown: last 7 days of daily revenue for bar chart
+    """
+    now = datetime.now(timezone.utc)
+    week_ago = now - timedelta(days=7)
+    prev_week_ago = now - timedelta(days=14)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    prev_month_start = (month_start - timedelta(days=1)).replace(day=1)
+
+    weekly_revenue = float(
+        db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+        .filter(Sale.timestamp >= week_ago)
+        .scalar()
+    )
+    prev_weekly_revenue = float(
+        db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+        .filter(Sale.timestamp >= prev_week_ago, Sale.timestamp < week_ago)
+        .scalar()
+    )
+    monthly_revenue = float(
+        db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+        .filter(Sale.timestamp >= month_start)
+        .scalar()
+    )
+    prev_monthly_revenue = float(
+        db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+        .filter(Sale.timestamp >= prev_month_start, Sale.timestamp < month_start)
+        .scalar()
+    )
+
+    daily_breakdown = []
+    for i in range(6, -1, -1):
+        day_start = (now - timedelta(days=i)).replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+        rev = float(
+            db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+            .filter(Sale.timestamp >= day_start, Sale.timestamp < day_end)
+            .scalar()
+        )
+        daily_breakdown.append({
+            "date": day_start.strftime("%Y-%m-%d"),
+            "day": day_start.strftime("%a"),
+            "revenue": rev,
+        })
+
+    return {
+        "weekly_revenue": weekly_revenue,
+        "monthly_revenue": monthly_revenue,
+        "wow_growth": calculate_growth_trend(weekly_revenue, prev_weekly_revenue),
+        "mom_growth": calculate_growth_trend(monthly_revenue, prev_monthly_revenue),
+        "daily_breakdown": daily_breakdown,
+    }
+
+
+# ══════════════════════════════════════════════
+#  SOCIAL MEDIA QUICK-ORDER WORKFLOW
+# ══════════════════════════════════════════════
+
+def record_quick_order(ref: str, sku: str, quantity: int, sale_date: str | None = None):
+    """
+    Record a sale using a distributor ref code (D{id}) and product SKU.
+
+    Designed for social media DM workflows where the admin receives an order
+    via WhatsApp/Instagram and needs to log it in as few steps as possible.
+
+    ref format: "D{distributor_id}" — e.g. "D5" maps to distributor id=5.
+    sku: exact product SKU string.
+    """
+    ref = ref.strip().upper()
+    if not ref.startswith("D"):
+        raise ValueError(f"Invalid ref '{ref}'. Expected format: D{{id}}, e.g. D5.")
+    try:
+        distributor_id = int(ref[1:])
+    except ValueError:
+        raise ValueError(f"Invalid distributor ref: '{ref}'.")
+
+    product = Product.query.filter_by(sku=sku.strip()).first()
+    if product is None:
+        raise ValueError(f"Product SKU '{sku}' not found.")
+
+    return record_sale(product.id, distributor_id, quantity, sale_date)

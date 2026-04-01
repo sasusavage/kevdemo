@@ -285,6 +285,56 @@ def get_excel_report():
 
 
 # ══════════════════════════════════════════════
+#  REVENUE GROWTH TRENDS
+# ══════════════════════════════════════════════
+
+@api.route("/trends", methods=["GET"])
+def get_trends():
+    """Revenue-focused trend data: 7-day daily breakdown, weekly/monthly with WoW/MoM growth."""
+    try:
+        data = services.get_sales_trends()
+        return jsonify({"success": True, "data": data}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ══════════════════════════════════════════════
+#  SOCIAL MEDIA QUICK-ORDER
+# ══════════════════════════════════════════════
+
+@api.route("/quick-order", methods=["POST"])
+def quick_order():
+    """
+    Social media order intake — minimal fields for admin efficiency.
+
+    Body: { ref, sku, quantity, sale_date? }
+    ref: Distributor ref code, e.g. "D5"
+    sku: Product SKU string
+    """
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"success": False, "error": "JSON body required."}), 400
+
+    required = ["ref", "sku", "quantity"]
+    missing = [f for f in required if f not in payload]
+    if missing:
+        return jsonify({"success": False, "error": f"Missing fields: {', '.join(missing)}"}), 400
+
+    try:
+        sale = services.record_quick_order(
+            ref=str(payload["ref"]),
+            sku=str(payload["sku"]),
+            quantity=int(payload["quantity"]),
+            sale_date=payload.get("sale_date"),
+        )
+        return jsonify({"success": True, "data": sale}), 201
+    except ValueError as ve:
+        return jsonify({"success": False, "error": str(ve)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ══════════════════════════════════════════════
 #  AI BRAIN
 # ══════════════════════════════════════════════
 

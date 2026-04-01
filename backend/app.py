@@ -60,6 +60,14 @@ def create_app(config_name: str | None = None) -> Flask:
     def distributors():
         return send_from_directory(FRONTEND_DIR, "distributor_performance.html")
 
+    @app.route("/order")
+    def order_form():
+        """
+        Social media quick-order form.
+        Accepts ?ref=D{id} to pre-populate the distributor.
+        """
+        return send_from_directory(FRONTEND_DIR, "quick_order.html")
+
     return app
 
 

@@ -20,7 +20,8 @@ class Product(db.Model):
     name = db.Column(db.String(200), nullable=False)
     sku = db.Column(db.String(50), unique=True, nullable=False, index=True)
     quantity = db.Column(db.Integer, nullable=False, default=0)
-    price = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
+    price = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)  # Revenue price
+    cost_price = db.Column(db.Numeric(12, 2), nullable=False, default=0.00) # Purchase cost
     category = db.Column(db.String(100), nullable=True)
     image_url = db.Column(db.Text, nullable=True)
     min_stock_level = db.Column(db.Integer, nullable=False, default=20)
@@ -48,6 +49,9 @@ class Product(db.Model):
             "sku": self.sku,
             "quantity": self.quantity,
             "price": float(self.price),
+            "cost_price": float(self.cost_price),
+            "margin": float(self.price - self.cost_price) if self.price and self.cost_price else 0.0,
+            "margin_percent": float(((self.price - self.cost_price) / self.price) * 100) if self.price and self.price > 0 else 0.0,
             "category": self.category,
             "image_url": self.image_url,
             "min_stock_level": self.min_stock_level,
@@ -90,6 +94,9 @@ class Distributor(db.Model):
     contact = db.Column(db.String(200), nullable=True)
     region = db.Column(db.String(100), nullable=True)
     tier = db.Column(db.String(20), nullable=True)
+    # Commission rate as a decimal fraction, e.g. 0.05 = 5%.
+    # Migration: ALTER TABLE distributors ADD COLUMN commission_rate NUMERIC(5,4) NOT NULL DEFAULT 0.0500;
+    commission_rate = db.Column(db.Numeric(5, 4), nullable=False, default=0.0500)
     created_at = db.Column(
         db.DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -105,6 +112,8 @@ class Distributor(db.Model):
             "contact": self.contact,
             "region": self.region,
             "tier": self.tier,
+            "commission_rate": float(self.commission_rate),
+            "ref_code": f"D{self.id}",
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -122,7 +131,12 @@ class Sale(db.Model):
         db.Integer, db.ForeignKey("distributors.id"), nullable=False, index=True
     )
     quantity_sold = db.Column(db.Integer, nullable=False)
-    total_price = db.Column(db.Numeric(12, 2), nullable=False)
+    total_price = db.Column(db.Numeric(12, 2), nullable=False)  # Total Revenue
+    unit_cost = db.Column(db.Numeric(12, 2), nullable=False, default=0.00) # Cost at time of sale
+    profit = db.Column(db.Numeric(12, 2), nullable=False, default=0.00) # total_price - (unit_cost * quantity)
+    # commission_earned = distributor.commission_rate * total_price, snapshotted at sale time.
+    # Migration: ALTER TABLE sales ADD COLUMN commission_earned NUMERIC(12,2) NOT NULL DEFAULT 0.00;
+    commission_earned = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
     timestamp = db.Column(
         db.DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -142,6 +156,9 @@ class Sale(db.Model):
             "distributor_name": self.distributor.name if self.distributor else None,
             "quantity_sold": self.quantity_sold,
             "total_price": float(self.total_price),
+            "unit_cost": float(self.unit_cost),
+            "profit": float(self.profit),
+            "commission_earned": float(self.commission_earned),
             "timestamp": self.timestamp.isoformat() if self.timestamp else None,
         }
 
